@@ -1,0 +1,10 @@
+# AppleMusic
+AppleMusic is an ADOBE AIR Native Extension (ANE) for using the new iOS 11.0 Apple MusickKit on iOS devices.
+
+
+# Installation
+The ANE is already compiled. You can find under the folder Binaries. 
+If you want to recompile it, just run ant in the same directory, after changing the parameters (called properties) in build.xml.
+
+
+It is distributed under Apache 2.0 license.
