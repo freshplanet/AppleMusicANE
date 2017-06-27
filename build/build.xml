@@ -14,13 +14,13 @@
         <mkdir dir="temp/ios/"/>
 
         <!-- clean the build -->
-        <exec executable="/Applications/Xcode-beta.app/Contents/Developer/usr/bin/xcodebuild" failonerror="true" dir="../ios/">
+        <exec executable="${ios.sdk.build}" failonerror="true" dir="../ios/">
             <arg line="-project ${name}.xcodeproj"/>
             <arg line="-alltargets clean"/>
         </exec>
 
         <!-- compile the ios lib -->
-        <exec executable="/Applications/Xcode-beta.app/Contents/Developer/usr/bin/xcodebuild" failonerror="true" dir="../ios/">
+        <exec executable="${ios.sdk.build}" failonerror="true" dir="../ios/">
             <arg line="-project ${name}.xcodeproj"/>
             <arg line="-sdk iphoneos"/>
             <arg line="-alltargets"/>
