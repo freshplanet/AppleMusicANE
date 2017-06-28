@@ -174,8 +174,8 @@ public class AppleMusic extends EventDispatcher {
 			_extContext.call("performAppleMusicCatalogSearch", searchText, limit, offset);
 		}
 
-		public function presentTrialDialogIfEligible():void {
-			_extContext.call("presentTrialDialogIfEligible");
+		public function presentTrialDialogIfEligible(affiliateKey:String = null, affiliateCampaignKey:String = null):void {
+			_extContext.call("presentTrialDialogIfEligible", affiliateKey == null ? "" : affiliateKey, affiliateCampaignKey == null ? "" : affiliateCampaignKey);
 		}
 
 

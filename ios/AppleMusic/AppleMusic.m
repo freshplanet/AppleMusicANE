@@ -162,12 +162,23 @@
     return mediaItems.firstObject;
 }
 
-- (void) presentAppleMusicTrialDialogIfEligible {
+- (void) presentAppleMusicTrialDialogIfEligible:(NSString*)affiliateKey affiliateCampaignKey:(NSString*)affiliateCampaignKey {
     
     if ((_cloudServiceCapabilities & SKCloudServiceCapabilityMusicCatalogSubscriptionEligible) && !(_cloudServiceCapabilities & SKCloudServiceCapabilityMusicCatalogPlayback)) {
         // eligible
+        NSMutableDictionary *optionKeys = [[NSMutableDictionary alloc] init]; 
+        [optionKeys setValue:SKCloudServiceSetupActionSubscribe forKey:SKCloudServiceSetupOptionsActionKey];
+        if (affiliateKey != nil && ![affiliateKey isEqualToString:@""]) {
+            [self sendLog:@"setting SKCloudServiceSetupOptionsAffiliateTokenKey"];
+            [optionKeys setValue:affiliateKey forKey:SKCloudServiceSetupOptionsAffiliateTokenKey];
+        }
+        if (affiliateCampaignKey != nil && ![affiliateCampaignKey isEqualToString:@""]) {
+            [self sendLog:@"setting SKCloudServiceSetupOptionsCampaignTokenKey"];
+            [optionKeys setValue:affiliateCampaignKey forKey:SKCloudServiceSetupOptionsCampaignTokenKey];
+        }
+        
         SKCloudServiceSetupViewController *setupController = [[SKCloudServiceSetupViewController alloc] init];
-        [setupController loadWithOptions:@{ SKCloudServiceSetupOptionsActionKey: SKCloudServiceSetupActionSubscribe } completionHandler:^(BOOL result, NSError * _Nullable error) {
+        [setupController loadWithOptions:optionKeys completionHandler:^(BOOL result, NSError * _Nullable error) {
             if (error != nil) {
                 [self sendLog:[@"Error occured while trying to present trial dialog:" stringByAppendingString:error.localizedDescription]];
                 return;
@@ -541,8 +552,15 @@ DEFINE_ANE_FUNCTION(presentTrialDialogIfEligible) {
     AppleMusic* controller = GetAppleMusicContextNativeData(context);
     if (!controller)
         return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    @try {
+        NSString* affiliateKey = FPANE_FREObjectToNSString((argv[0]));
+        NSString* affiliateCampaignKey = FPANE_FREObjectToNSString((argv[1]));
+        [controller presentAppleMusicTrialDialogIfEligible:affiliateKey affiliateCampaignKey:affiliateCampaignKey];
+    }
+    @catch (NSException *exception) {
+        [controller sendLog:[@"Exception occured while trying to present Trial Dialog : " stringByAppendingString:exception.reason]];
+    }
     
-    [controller presentAppleMusicTrialDialogIfEligible];
     return nil;
 }
 
