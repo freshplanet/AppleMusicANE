@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.VOs {
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicSongType;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicSongType;
 import flash.display.BitmapData;
 
-public class AppleMusicSong {
+public class AirAppleMusicSong {
 
 	private var _id:String;
 	private var _songName:String;
 	private var _albumName:String;
 	private var _artistName:String;
-	private var _type:AppleMusicSongType;
+	private var _type:AirAppleMusicSongType;
 	private var _duration:Number;
 	private var _artwork:BitmapData;
 	private var _artworkURL:String;
@@ -30,7 +30,7 @@ public class AppleMusicSong {
 	private var _artworkHeight:Number;
 
 	/**
-	 * AppleMusicSong
+	 * AirAppleMusicSong
 	 * @param id
 	 * @param songName
 	 * @param albumName
@@ -41,7 +41,7 @@ public class AppleMusicSong {
 	 * @param artworkWidth
 	 * @param artworkHeight
 	 */
-	public function AppleMusicSong(id:String, songName:String, albumName:String, artistName:String, duration:Number, type:AppleMusicSongType, artworkURL:String, artworkWidth:Number, artworkHeight:Number) {
+	public function AirAppleMusicSong(id:String, songName:String, albumName:String, artistName:String, duration:Number, type:AirAppleMusicSongType, artworkURL:String, artworkWidth:Number, artworkHeight:Number) {
 		_id = id;
 		_songName = songName;
 		_albumName = albumName;
@@ -84,7 +84,7 @@ public class AppleMusicSong {
 	/**
 	 * Type of the song (Media Library or Apple Music Catalog)
 	 */
-	public function get type():AppleMusicSongType {
+	public function get type():AirAppleMusicSongType {
 		return _type;
 	}
 

@@ -33,6 +33,7 @@
 		A2BF289F1EFC2BD00088C3D6 /* FlashRuntimeExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlashRuntimeExtensions.h; sourceTree = "<group>"; };
 		A2BF28A01EFC2BDE0088C3D6 /* FPANEUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPANEUtils.h; sourceTree = "<group>"; };
 		A2BF28A11EFC2BDE0088C3D6 /* FPANEUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FPANEUtils.m; sourceTree = "<group>"; };
+		FA4F82A71F699FC000F4E077 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +52,7 @@
 			children = (
 				A24EDBF51EFC1B1400EE62D3 /* AppleMusic */,
 				A24EDBF41EFC1B1400EE62D3 /* Products */,
+				FA4F82A61F699FC000F4E077 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,6 +75,14 @@
 				A24EDC091EFC28FA00EE62D3 /* Constants.h */,
 			);
 			path = AppleMusic;
+			sourceTree = "<group>";
+		};
+		FA4F82A61F699FC000F4E077 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FA4F82A71F699FC000F4E077 /* IOSurface.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -185,9 +195,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -232,8 +243,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -242,11 +254,7 @@
 		A24EDBFD1EFC1B1400EE62D3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					armv7,
-					armv7s,
-				);
+				ARCHS = "$(ARCHS_STANDARD)";
 				DEVELOPMENT_TEAM = HWKC8H7H6U;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
@@ -259,11 +267,7 @@
 		A24EDBFE1EFC1B1400EE62D3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					"$(ARCHS_STANDARD)",
-					armv7,
-					armv7s,
-				);
+				ARCHS = "$(ARCHS_STANDARD)";
 				DEVELOPMENT_TEAM = HWKC8H7H6U;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

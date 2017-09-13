@@ -15,7 +15,7 @@
 package com.freshplanet.ane.AppleMusic.events {
 import flash.events.Event;
 
-public class AppleMusicEvent extends Event {
+public class AirAppleMusicEvent extends Event {
 
 	/**
 	 * Music played updated the state ( play/pause/stop, next item began playback...)
@@ -31,7 +31,7 @@ public class AppleMusicEvent extends Event {
 	 */
 	static public const DID_DISMISS_SUBSCRIPTION_TRIAL_DIALOG :String = "AppleMusicEvent_didDismissSubscriptionTrialDialog";
 
-	public function AppleMusicEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
+	public function AirAppleMusicEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
 		super(type, bubbles, cancelable);
 	}
 

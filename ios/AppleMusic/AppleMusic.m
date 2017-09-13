@@ -71,7 +71,8 @@
 - (void) requestCloudServiceCapabilities {
     [_cloudServiceController requestCapabilitiesWithCompletionHandler:^(SKCloudServiceCapability capabilities, NSError * _Nullable error) {
         if (error != nil) {
-            [self sendLog:[@"Error occured while requesting cloud service capabilities:" stringByAppendingString:error.localizedDescription]];
+            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES level:error.localizedDescription];
+//            [self sendLog:[@"Error occured while requesting cloud service capabilities:" stringByAppendingString:error.localizedDescription]];
             return;
         }
         
@@ -95,6 +96,10 @@
 
 - (void) setCurrentMediaLibrarySongs : (NSArray<MPMediaItem *>*) songs {
     _currentMediaLibrarySongs = songs;
+}
+
+- (void) setCurrentMediaLibraryPlaylists : (NSArray<MPMediaPlaylist *>*) playlists {
+    _currentMediaLibraryPlaylists = playlists;
 }
 
 - (BOOL) isMediaLibraryItem : (MPMediaItem*) song {
@@ -187,7 +192,8 @@
         SKCloudServiceSetupViewController *setupController = [[SKCloudServiceSetupViewController alloc] init];
         [setupController loadWithOptions:optionKeys completionHandler:^(BOOL result, NSError * _Nullable error) {
             if (error != nil) {
-                [self sendLog:[@"Error occured while trying to present trial dialog:" stringByAppendingString:error.localizedDescription]];
+                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_PRESENTING_TRIAL_DIALOG level:error.localizedDescription];
+//                [self sendLog:[@"Error occured while trying to present trial dialog:" stringByAppendingString:error.localizedDescription]];
                 return;
             }
             
@@ -211,7 +217,8 @@
         
         [_cloudServiceController requestStorefrontCountryCodeWithCompletionHandler:^(NSString * _Nullable storefrontCountryCode, NSError * _Nullable error) {
             if (error != nil) {
-                [self sendLog:[@"Error occured while requesting Storefront country code:" stringByAppendingString:error.localizedDescription]];
+                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE level:error.localizedDescription];
+//                [self sendLog:[@"Error occured while requesting Storefront country code:" stringByAppendingString:error.localizedDescription]];
                 return;
             }
             _cloudServiceStorefrontCountryCode = storefrontCountryCode;
@@ -251,7 +258,8 @@
         NSError * _Nullable error) {
           NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
           if (error != nil || httpResponse == nil || httpResponse.statusCode != 200 ) {
-              [self sendLog:[@"Error occured while performing Apple Music Storefronts Lookup:" stringByAppendingString:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])]];
+//              [self sendLog:[@"Error occured while performing Apple Music Storefronts Lookup:" stringByAppendingString:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])]];
+              [self sendEvent:kAirAppleMusicErrorEvent_ERROR_PERFORMING_STOREFRONTS_LOOKUP level:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])];
               return;
           }
           
@@ -274,6 +282,9 @@
         [self sendLog:@"Please set the developer token first"];
         return;
     }
+    
+    [self sendLog:[@"_cloudServiceStorefrontCountryCode : " stringByAppendingString:_cloudServiceStorefrontCountryCode == nil ? @"NULL" : _cloudServiceStorefrontCountryCode]];
+    
     NSURLComponents *urlComponents = [NSURLComponents new];
     urlComponents.scheme = @"https";
     urlComponents.host = kAppleMusicAPIBaseURLString;
@@ -298,7 +309,8 @@
         NSError * _Nullable error) {
           NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
           if (error != nil || httpResponse == nil || httpResponse.statusCode != 200 ) {
-              [self sendLog:[@"Error occured while performing Apple Music Catalog Search: " stringByAppendingString:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])]];
+              [self sendEvent:kAirAppleMusicErrorEvent_ERROR_PERFORMING_APPLE_MUSIC_CATALOG_SEARCH level:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])];
+//              [self sendLog:[@"Error occured while performing Apple Music Catalog Search: " stringByAppendingString:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])]];
               return;
           }
           
@@ -346,6 +358,166 @@
           
           
       }] resume];
+}
+
+-(void) addSongToPlaylist :(NSString*) playlistID songID:(NSString*) songId songType:(NSString*) songType {
+
+    [self sendLog:@"adding song to playlist"];
+//    [[MPMediaLibrary defaultMediaLibrary] addItemWithProductID:songId completionHandler:^(NSArray<__kindof MPMediaEntity *> * _Nonnull entities, NSError * _Nullable error) {
+//        if (error != nil) {
+//            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+//            return;
+//        }
+    
+        NSArray *playlists = [_currentMediaLibraryPlaylists filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+            return [playlistID isEqualToString:[(NSNumber *)[object valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue]];
+        }]];
+
+        if (playlists.count < 1) {
+            [self sendLog:@"no playlist error"];
+            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:[@"Could not find playlist with id " stringByAppendingString:playlistID]];
+        }
+        MPMediaPlaylist *playlist = playlists.firstObject;
+        [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
+            if (error != nil) {
+                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+            }
+        }];
+    
+    
+//    [[MPMediaLibrary defaultMediaLibrary] getPlaylistWithUUID:[NSUUID UUID] creationMetadata:[[MPMediaPlaylistCreationMetadata alloc] initWithName:@"Classical Music"]  completionHandler:^(MPMediaPlaylist * _Nullable playlist, NSError * _Nullable error) {
+////        [self sendLog:[@"filtered playlist name is " stringByAppendingString:playlist.name]];
+////        if ([songType isEqualToString:kSongType_APPLE_MUSIC_CATALOG]) {
+////
+////            [self sendLog:@"Adding after delay"];
+//            if (error != nil) {
+//                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+//                return;
+//            }
+//            [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
+//                if (error != nil) {
+//                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+//                }
+//            }];
+//
+//        }];
+//
+    
+            
+
+//            [playlist addMediaItems:@[entities.firstObject] completionHandler:^(NSError * _Nullable error) {
+//                if (error != nil) {
+//                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+//                }
+//            }];
+//        }
+//        else { //([songType isEqualToString:kSongType_MEDIA_LIBRARY]) {
+//            MPMediaItem* mediaSong = [self getMediaItem:songId];
+//            [playlist addMediaItems:@[mediaSong] completionHandler:^(NSError * _Nullable error) {
+//                if (error != nil) {
+//                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+//                }
+//            }];
+//        }
+//    }];
+
+    
+}
+
+- (NSString*) dictionaryToNSString :(NSDictionary*) dictionary {
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary
+                                                       options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
+                                                         error:&error];
+    if (! jsonData) {
+        return @"";
+    } else {
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
+}
+
+-(NSDictionary*) mediaItemToNSDictionary:(MPMediaItem*) mediaItem songType:(NSString*) type {
+    
+    NSString *artistName = [mediaItem valueForProperty:MPMediaItemPropertyArtist];
+    NSString *albumName = [mediaItem valueForProperty:MPMediaItemPropertyAlbumTitle];
+    NSString *songName = [mediaItem valueForProperty:MPMediaItemPropertyTitle];
+    NSString *songId = [(NSNumber *)[mediaItem valueForProperty:MPMediaItemPropertyPersistentID] stringValue];
+    NSNumber *duration = [mediaItem valueForProperty:MPMediaItemPropertyPlaybackDuration];
+    
+    NSMutableDictionary *itemDict = [[NSMutableDictionary alloc] init];
+    [itemDict setValue:artistName != nil ? artistName : @"" forKey:kARTIST_NAME];
+    [itemDict setValue:albumName != nil ? albumName : @"" forKey:kALBUM_NAME];
+    [itemDict setValue:songName != nil ? songName : @"" forKey:kSONG_NAME];
+    [itemDict setValue:songId forKey:kSONG_ID];
+    [itemDict setValue:type forKey:kSONG_TYPE];
+    [itemDict setValue:duration forKey:kSONG_DURATION];
+    
+    
+    return itemDict;
+}
+
+-(NSDictionary*) playlistToNSDictionary:(MPMediaPlaylist*) mediaPlaylist {
+    
+    NSString *playlistName = [mediaPlaylist valueForProperty:MPMediaPlaylistPropertyName];
+    NSString *playlistId = [(NSNumber *)[mediaPlaylist valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue];
+    
+    NSMutableDictionary *itemDict = [[NSMutableDictionary alloc] init];
+    [itemDict setValue:playlistId != nil ? playlistId : @"" forKey:kPLAYLIST_ID];
+    [itemDict setValue:playlistName != nil ? playlistName : @"No name" forKey:kPLAYLIST_NAME];
+    return itemDict;
+}
+
+-(NSString*) mediaItemToJSONString: (MPMediaItem*) mediaItem songType:(NSString*)type {
+    NSDictionary *itemDict = [self mediaItemToNSDictionary:mediaItem songType:type];
+    return [self dictionaryToNSString:itemDict];
+}
+
+-(NSString*) mediaItemsToJSONString: (NSArray*) mediaItems {
+    
+    NSMutableArray* result = [[NSMutableArray alloc] init];
+    
+    for (MPMediaItem *item in mediaItems)
+    {
+        NSDictionary *itemDict = [self mediaItemToNSDictionary:item songType:kSongType_MEDIA_LIBRARY];
+        
+        [result addObject:itemDict];
+    }
+    
+    return [self arrayToNSString:result];
+    
+}
+
+-(NSString*) playlistsToJSONString: (NSArray*) playlists {
+    
+    NSMutableArray* result = [[NSMutableArray alloc] init];
+    
+    for (MPMediaPlaylist *item in playlists)
+    {
+        if (item != nil) {
+            NSDictionary *itemDict = [self playlistToNSDictionary:item];
+            [result addObject:itemDict];
+        }
+        
+    }
+    return [self arrayToNSString:result];
+}
+
+- (NSString*) arrayToNSString:(NSArray*) array{
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:array
+                                                       options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
+                                                         error:&error];
+    if (! jsonData) {
+        return @"";
+    } else {
+        return [self JSONString:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+    }
+}
+
+-(NSString *)JSONString:(NSString *)aString {
+    NSMutableString *s = [NSMutableString stringWithString:aString];
+    [s replaceOccurrencesOfString:@"’" withString:@"'" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [s length])];
+    return [NSString stringWithString:s];
 }
 
 @end
@@ -462,69 +634,7 @@ FREResult fillBitmapData(FREContext ctx, FREObject obj, UIImage *image)
 
 
 
-NSString* dictionaryToNSString(NSDictionary *dictionary){
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary
-                                                       options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
-                                                         error:&error];
-    if (! jsonData) {
-        return @"";
-    } else {
-        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-}
 
-NSString* arrayToNSString(NSArray *array){
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:array
-                                                       options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
-                                                         error:&error];
-    if (! jsonData) {
-        return @"";
-    } else {
-        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-}
-
-NSDictionary* mediaItemToNSDictionary(MPMediaItem *mediaItem, NSString* songType) {
-    
-    NSString *artistName = [mediaItem valueForProperty:MPMediaItemPropertyArtist];
-    NSString *albumName = [mediaItem valueForProperty:MPMediaItemPropertyAlbumTitle];
-    NSString *songName = [mediaItem valueForProperty:MPMediaItemPropertyTitle];
-    NSString *songId = [(NSNumber *)[mediaItem valueForProperty:MPMediaItemPropertyPersistentID] stringValue];
-    NSNumber *duration = [mediaItem valueForProperty:MPMediaItemPropertyPlaybackDuration];
-    
-    NSMutableDictionary *itemDict = [[NSMutableDictionary alloc] init];
-    [itemDict setValue:artistName != nil ? artistName : @"" forKey:kARTIST_NAME];
-    [itemDict setValue:albumName != nil ? albumName : @"" forKey:kALBUM_NAME];
-    [itemDict setValue:songName != nil ? songName : @"" forKey:kSONG_NAME];
-    [itemDict setValue:songId forKey:kSONG_ID];
-    [itemDict setValue:songType forKey:kSONG_TYPE];
-    [itemDict setValue:duration forKey:kSONG_DURATION];
-    
-    
-    return itemDict;
-}
-
-NSString* mediaItemToJSONString(MPMediaItem *mediaItem, NSString* songType) {
-    
-    NSDictionary *itemDict = mediaItemToNSDictionary(mediaItem, songType);
-    return dictionaryToNSString(itemDict);
-}
-
-NSString* mediaItemsToJSONString(NSArray *mediaItems) {
-    
-    NSMutableArray* result = [[NSMutableArray alloc] init];
-    
-    for (MPMediaItem *item in mediaItems)
-    {
-        NSDictionary *itemDict = mediaItemToNSDictionary(item, kSongType_MEDIA_LIBRARY);
-        [result addObject:itemDict];
-    }
-    
-    return arrayToNSString(result);
-    
-}
 
 AppleMusic* GetAppleMusicContextNativeData(FREContext context) {
     
@@ -634,15 +744,17 @@ DEFINE_ANE_FUNCTION(requestAuthorization) {
         [SKCloudServiceController requestAuthorization:^(SKCloudServiceAuthorizationStatus status) {
             switch (status) {
                 case SKCloudServiceAuthorizationStatusAuthorized:
-                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:dictionaryToNSString([NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_AUTHORIZED, kSTATUS, kAuthorizationType_CLOUD_SERVICE, kTYPE, nil])];
+                    
+                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:[controller dictionaryToNSString:[NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_AUTHORIZED, kSTATUS, kAuthorizationType_CLOUD_SERVICE, kTYPE, nil]]];
                     [controller requestCloudServiceCapabilities];
                     [controller requestStorefrontCountryCode];
                     break;
                 case SKCloudServiceAuthorizationStatusDenied:
-                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:dictionaryToNSString([NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_DENIED, kSTATUS, kAuthorizationType_CLOUD_SERVICE, kTYPE, nil])];
+                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:[controller dictionaryToNSString:[NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_DENIED, kSTATUS, kAuthorizationType_CLOUD_SERVICE, kTYPE, nil]]];
                     break;
                 case SKCloudServiceAuthorizationStatusRestricted:
-                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:dictionaryToNSString([NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_RESTRICTED, kSTATUS, kAuthorizationType_CLOUD_SERVICE, kTYPE, nil])];
+                    
+                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:[controller dictionaryToNSString:[NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_RESTRICTED, kSTATUS, kAuthorizationType_CLOUD_SERVICE, kTYPE, nil]]];
                     break;
                 default:
                     break;
@@ -658,13 +770,14 @@ DEFINE_ANE_FUNCTION(requestAuthorization) {
         [MPMediaLibrary requestAuthorization:^(MPMediaLibraryAuthorizationStatus status) {
             switch (status) {
                 case MPMediaLibraryAuthorizationStatusAuthorized:
-                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:dictionaryToNSString([NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_AUTHORIZED, kSTATUS, kAuthorizationType_MEDIA_LIBRARY, kTYPE, nil])];
+                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:[controller dictionaryToNSString:[NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_AUTHORIZED, kSTATUS, kAuthorizationType_MEDIA_LIBRARY, kTYPE, nil]]];
                     break;
                 case MPMediaLibraryAuthorizationStatusDenied:
-                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:dictionaryToNSString([NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_DENIED, kSTATUS, kAuthorizationType_MEDIA_LIBRARY, kTYPE, nil])];
+                    
+                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:[controller dictionaryToNSString:[NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_DENIED, kSTATUS, kAuthorizationType_MEDIA_LIBRARY, kTYPE, nil]]];
                     break;
                 case MPMediaLibraryAuthorizationStatusRestricted:
-                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:dictionaryToNSString([NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_RESTRICTED, kSTATUS, kAuthorizationType_MEDIA_LIBRARY, kTYPE, nil])];
+                    [controller sendEvent:kAuthorizationEvent_AUTHORIZATION_DID_UPDATE level:[controller dictionaryToNSString:[NSDictionary dictionaryWithObjectsAndKeys:kAuthorizationStatus_RESTRICTED, kSTATUS, kAuthorizationType_MEDIA_LIBRARY, kTYPE, nil]]];
                     break;
                 default:
                     break;
@@ -707,8 +820,52 @@ DEFINE_ANE_FUNCTION(getMediaLibrarySongs) {
     MPMediaQuery *query = [MPMediaQuery songsQuery];
     NSArray *items = [query items];
     [controller setCurrentMediaLibrarySongs:items];
-    NSString *itemsJSONString = mediaItemsToJSONString(items);
+    NSString *itemsJSONString = [controller mediaItemsToJSONString:items];
     return FPANE_NSStringToFREObject(itemsJSONString);
+}
+
+DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
+        [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    MPMediaQuery *query = [MPMediaQuery playlistsQuery];
+    NSArray *playlists = [query collections];
+     
+    [controller sendLog:[@"IN IOSSS number of playlists::" stringByAppendingString:[NSString stringWithFormat:@"%lu",(unsigned long)playlists.count]]];
+    [controller setCurrentMediaLibraryPlaylists:playlists];
+    NSString *playlistsJSONString = [controller playlistsToJSONString:playlists];
+    return FPANE_NSStringToFREObject(playlistsJSONString);
+    
+}
+
+DEFINE_ANE_FUNCTION(addToPlaylist) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
+        [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    @try {
+        NSString* playlistID = FPANE_FREObjectToNSString(argv[0]);
+        NSString* songID = FPANE_FREObjectToNSString(argv[1]);
+        NSString* songType = FPANE_FREObjectToNSString(argv[2]);
+        
+        [controller addSongToPlaylist:playlistID songID:songID songType:songType];
+    }
+    @catch (NSException *exception) {
+        [controller sendLog:[@"Exception occured while trying to add song to playlist : " stringByAppendingString:exception.reason]];
+    }
+    
+    return nil;
 }
 
 DEFINE_ANE_FUNCTION(playSongs) {
@@ -817,10 +974,9 @@ DEFINE_ANE_FUNCTION(nowPlayingItem) {
     BOOL isMediaLibrarySong = [controller isMediaLibraryItem:item];
     NSString *songType = isMediaLibrarySong ? kSongType_MEDIA_LIBRARY : kSongType_APPLE_MUSIC_CATALOG;
     if (item != nil) {
-        itemJSONString = mediaItemToJSONString(item, songType);
+        itemJSONString = [controller mediaItemToJSONString:item songType:songType];
     }
     return itemJSONString != nil ? FPANE_NSStringToFREObject(itemJSONString) : nil;
-    
 }
 
 DEFINE_ANE_FUNCTION(performAppleMusicCatalogSearch) {
@@ -892,6 +1048,8 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(cloudServiceCapabilities, NULL),
         MAP_FUNCTION(cloudServiceStorefrontCountryCode, NULL),
         MAP_FUNCTION(getMediaLibrarySongs, NULL),
+        MAP_FUNCTION(getMediaLibraryPlaylists, NULL),
+        MAP_FUNCTION(addToPlaylist, NULL),
         MAP_FUNCTION(playSongs, NULL),
         MAP_FUNCTION(togglePlayPause, NULL),
         MAP_FUNCTION(skipToNextSong, NULL),

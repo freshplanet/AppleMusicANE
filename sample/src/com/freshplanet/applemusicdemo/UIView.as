@@ -27,6 +27,7 @@ public class UIView extends PanelScreen {
 	public static const STOP:String = "STOP";
 	public static const SEARCH:String = "SEARCH";
 	public static const PRESENT_TRIAL:String = "PRESENT_TRIAL";
+	public static const GET_PLAYLISTS:String = "GET_PLAYLISTS";
 
 	override protected function initialize():void {
 		super.initialize();
@@ -196,6 +197,18 @@ public class UIView extends PanelScreen {
 		button.name = PRESENT_TRIAL;
 		button.addEventListener(Event.TRIGGERED, onButtonTriggered);
 		addChild(button);
+
+        layoutData = new AnchorLayoutData();
+        layoutData.topAnchorDisplayObject = button;
+        layoutData.top = spacing;
+        layoutData.left = spacing;
+        layoutData.right = spacing;
+
+        button = createButton("Get Playlists");
+        button.layoutData = layoutData;
+        button.name = GET_PLAYLISTS;
+        button.addEventListener(Event.TRIGGERED, onButtonTriggered);
+        addChild(button);
 
 	}
 

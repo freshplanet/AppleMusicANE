@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.events {
-import com.freshplanet.ane.AppleMusic.VOs.AppleMusicSong;
+import com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicSong;
 
-public class AppleMusicCatalogSearchEvent extends AppleMusicEvent {
+public class AirAppleMusicCatalogSearchEvent extends AirAppleMusicEvent {
 
 	/**
 	 * Receiving search results for Apple Music Catalog search. Use this in conjunction with <code>performAppleMusicCatalogSearch</code>
 	 */
 	static public const RECEIVED_SEARCH_RESULTS :String = "AppleMusicSearchEvent_receivedSearchResults";
 
-	private var _results:Vector.<AppleMusicSong>;
+	private var _results:Vector.<AirAppleMusicSong>;
 
 	/**
-	 * AppleMusicCatalogSearchEvent
+	 * AirAppleMusicCatalogSearchEvent
 	 * @param type
 	 * @param results
 	 * @param bubbles
 	 * @param cancelable
 	 */
-	public function AppleMusicCatalogSearchEvent(type:String, results:Vector.<AppleMusicSong>, bubbles:Boolean = false, cancelable:Boolean = false) {
+	public function AirAppleMusicCatalogSearchEvent(type:String, results:Vector.<AirAppleMusicSong>, bubbles:Boolean = false, cancelable:Boolean = false) {
 		super(type, bubbles, cancelable);
 		_results = results;
 	}
@@ -39,7 +39,7 @@ public class AppleMusicCatalogSearchEvent extends AppleMusicEvent {
 	/**
 	 * Results of the preformed Apple Music Catalog search
 	 */
-	public function get results():Vector.<AppleMusicSong> {
+	public function get results():Vector.<AirAppleMusicSong> {
 		return _results;
 	}
 }

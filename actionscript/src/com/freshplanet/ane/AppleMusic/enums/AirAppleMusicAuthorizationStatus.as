@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.enums {
-public class AppleMusicAuthorizationType {
+public class AirAppleMusicAuthorizationStatus {
 
 
 	/***************************
@@ -22,24 +22,39 @@ public class AppleMusicAuthorizationType {
 	 *
 	 ***************************/
 
-	/**
-	 * Media Library authorization type
-	 */
-	static public const MEDIA_LIBRARY   : AppleMusicAuthorizationType = new AppleMusicAuthorizationType(Private, "media_library");
-	/**
-	 * Cloud Service authorization type
-	 */
-	static public const CLOUD_SERVICE   : AppleMusicAuthorizationType = new AppleMusicAuthorizationType(Private, "cloud_service");
 
-	public static function fromValue(value:String):AppleMusicAuthorizationType {
+	/**
+	 * Authorized
+ 	 */
+	static public const AUTORIZED   : AirAppleMusicAuthorizationStatus = new AirAppleMusicAuthorizationStatus(Private, "authorized");
+	/**
+	 * Denied
+	 */
+	static public const DENIED   : AirAppleMusicAuthorizationStatus = new AirAppleMusicAuthorizationStatus(Private, "denied");
+	/**
+	 * Not determined - not yet requested
+	 */
+	static public const NOT_DETERMINED   : AirAppleMusicAuthorizationStatus = new AirAppleMusicAuthorizationStatus(Private, "not_determined");
+	/**
+	 * Restricted
+	 */
+	static public const RESTRICTED   : AirAppleMusicAuthorizationStatus = new AirAppleMusicAuthorizationStatus(Private, "restricted");
+
+	public static function fromValue(value:String):AirAppleMusicAuthorizationStatus {
 
 		switch (value)
 		{
-			case MEDIA_LIBRARY.value:
-				return MEDIA_LIBRARY;
+			case AUTORIZED.value:
+				return AUTORIZED;
 				break;
-			case CLOUD_SERVICE.value:
-				return CLOUD_SERVICE;
+			case DENIED.value:
+				return DENIED;
+				break;
+			case NOT_DETERMINED.value:
+				return NOT_DETERMINED;
+				break;
+			case RESTRICTED.value:
+				return RESTRICTED;
 				break;
 			default:
 				return null;
@@ -47,6 +62,9 @@ public class AppleMusicAuthorizationType {
 		}
 	}
 
+	/**
+	 * Raw string value
+	 */
 	public function get value():String {
 		return _value;
 	}
@@ -59,7 +77,7 @@ public class AppleMusicAuthorizationType {
 
 	private var _value:String = null;
 
-	public function AppleMusicAuthorizationType(access:Class, value:String) {
+	public function AirAppleMusicAuthorizationStatus(access:Class, value:String) {
 
 		if (access != Private)
 			throw new Error("Private constructor call!");

@@ -17,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////////////////////-->
 
 <extension xmlns="http://ns.adobe.com/air/extension/26.0">
-    <id>com.freshplanet.ane.AppleMusic</id>
+    <id>com.freshplanet.ane.AirAppleMusic</id>
     <versionNumber>1</versionNumber>
     <platforms>
         <platform name="iPhone-ARM">

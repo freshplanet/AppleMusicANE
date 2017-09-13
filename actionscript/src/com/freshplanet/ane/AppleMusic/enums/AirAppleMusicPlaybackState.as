@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.enums {
-public class AppleMusicSongType {
+public class AirAppleMusicPlaybackState {
 
 
 	/***************************
@@ -22,25 +22,38 @@ public class AppleMusicSongType {
 	 *
 	 ***************************/
 
-
 	/**
-	 * Media Library song type
- 	 */
-	static public const MEDIA_LIBRARY   : AppleMusicSongType = new AppleMusicSongType(Private, "media_library_song");
-	/**
-	 * Apple Music Catalog song type
+	 * The music player is stopped.
 	 */
-	static public const APPLE_MUSIC_CATALOG   : AppleMusicSongType = new AppleMusicSongType(Private, "apple_music_catalog_song");
+	static public const STOPPED   : AirAppleMusicPlaybackState = new AirAppleMusicPlaybackState(Private, "stopped");
+	/**
+	 * The music player is playing.
+	 */
+	static public const PLAYING   : AirAppleMusicPlaybackState = new AirAppleMusicPlaybackState(Private, "playing");
+	/**
+	 * The music player is paused.
+	 */
+	static public const PAUSED : AirAppleMusicPlaybackState = new AirAppleMusicPlaybackState(Private, "paused");
+	/**
+	 * The music player has been interrupted, such as by an incoming phone call.
+	 */
+	static public const INTERRUPTED   : AirAppleMusicPlaybackState = new AirAppleMusicPlaybackState(Private, "interrupted");
 
-	public static function fromValue(value:String):AppleMusicSongType {
+	public static function fromValue(value:String):AirAppleMusicPlaybackState {
 
 		switch (value)
 		{
-			case MEDIA_LIBRARY.value:
-				return MEDIA_LIBRARY;
+			case STOPPED.value:
+				return STOPPED;
 				break;
-			case APPLE_MUSIC_CATALOG.value:
-				return APPLE_MUSIC_CATALOG;
+			case PLAYING.value:
+				return PLAYING;
+				break;
+			case PAUSED.value:
+				return PAUSED;
+				break;
+			case INTERRUPTED.value:
+				return INTERRUPTED;
 				break;
 			default:
 				return null;
@@ -60,7 +73,7 @@ public class AppleMusicSongType {
 
 	private var _value:String = null;
 
-	public function AppleMusicSongType(access:Class, value:String) {
+	public function AirAppleMusicPlaybackState(access:Class, value:String) {
 
 		if (access != Private)
 			throw new Error("Private constructor call!");

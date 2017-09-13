@@ -29,6 +29,13 @@ static NSString *const kAppleMusicEvent_SUBSCRIPTION_TRIAL_NOT_ELIGIBLE  = @"App
 static NSString *const kAppleMusicEvent_DID_DISMISS_SUBSCRIPTION_TRIAL_DIALOG  = @"AppleMusicEvent_didDismissSubscriptionTrialDialog";
 static NSString *const kAppleMusicSearchEvent_RECEIVED_SEARCH_RESULTS  = @"AppleMusicSearchEvent_receivedSearchResults";
 
+static NSString *const kAirAppleMusicErrorEvent_ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES = @"AppleMusicErrorEvent_errorRequestingCloudServiceCapabilities";
+static NSString *const kAirAppleMusicErrorEvent_ERROR_PRESENTING_TRIAL_DIALOG = @"AppleMusicErrorEvent_errorPresentingTrialDialog";
+static NSString *const kAirAppleMusicErrorEvent_ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE = @"AppleMusicErrorEvent_errorRequestingStorefrontCountryCode";
+static NSString *const kAirAppleMusicErrorEvent_ERROR_PERFORMING_STOREFRONTS_LOOKUP = @"AppleMusicErrorEvent_errorPerformingStorefrontsLookup";
+static NSString *const kAirAppleMusicErrorEvent_ERROR_PERFORMING_APPLE_MUSIC_CATALOG_SEARCH = @"AppleMusicErrorEvent_errorPerformingAppleMusicCatalogSearch";
+static NSString *const kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST = @"AppleMusicErrorEvent_errorAddingSongToPlaylist";
+
 /* AUTHORIZATION TYPE */
 static NSString *const kAuthorizationType_MEDIA_LIBRARY = @"media_library";
 static NSString *const kAuthorizationType_CLOUD_SERVICE = @"cloud_service";
@@ -49,7 +56,6 @@ static NSString *const kPlaybackState_STOPPED = @"stopped";
 static NSString *const kPlaybackState_PAUSED = @"paused";
 static NSString *const kPlaybackState_INTERRUPTED = @"interrupted";
 
-
 /* DATA KEYS */
 static NSString *const kSTATUS = @"status";
 static NSString *const kTYPE = @"type";
@@ -64,3 +70,7 @@ static NSString *const kSONG_DURATION = @"song_duration";
 static NSString *const kSONG_ARTWORK_WIDTH = @"artwork_width";
 static NSString *const kSONG_ARTWORK_HEIGHT = @"artwork_height";
 static NSString *const kSONG_ARTWORK_URL = @"artwork_url";
+
+static NSString *const kPLAYLIST_ID = @"playlist_id";
+static NSString *const kPLAYLIST_NAME = @"playlist_name";
+

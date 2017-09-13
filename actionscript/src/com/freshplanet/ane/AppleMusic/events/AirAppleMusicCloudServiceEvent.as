@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.events {
-public class AppleMusicCloudServiceEvent extends AppleMusicEvent {
+public class AirAppleMusicCloudServiceEvent extends AirAppleMusicEvent {
 
 	/**
 	 * Cloud Service Capabilities or Storefront country code changed
@@ -21,12 +21,12 @@ public class AppleMusicCloudServiceEvent extends AppleMusicEvent {
 	static public const CLOUD_SERVICE_DID_UPDATE :String = "AppleMusicCloudServiceEvent_cloudServiceDidUpdate";
 
 	/**
-	 * AppleMusicCloudServiceEvent
+	 * AirAppleMusicCloudServiceEvent
 	 * @param type
 	 * @param bubbles
 	 * @param cancelable
 	 */
-	public function AppleMusicCloudServiceEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
+	public function AirAppleMusicCloudServiceEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
 		super(type, bubbles, cancelable);
 	}
 }

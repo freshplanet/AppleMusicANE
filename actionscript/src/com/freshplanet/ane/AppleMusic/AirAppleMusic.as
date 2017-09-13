@@ -13,22 +13,24 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic {
-import com.freshplanet.ane.AppleMusic.VOs.AppleMusicSong;
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicAuthorizationStatus;
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicAuthorizationType;
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicPlaybackState;
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicSongType;
-import com.freshplanet.ane.AppleMusic.events.AppleMusicAuthorizationEvent;
-import com.freshplanet.ane.AppleMusic.events.AppleMusicCloudServiceEvent;
-import com.freshplanet.ane.AppleMusic.events.AppleMusicEvent;
-import com.freshplanet.ane.AppleMusic.events.AppleMusicCatalogSearchEvent;
+import com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicPlaylist;
+import com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicSong;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicAuthorizationStatus;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicAuthorizationType;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicPlaybackState;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicSongType;
+import com.freshplanet.ane.AppleMusic.events.AirAppleMusicAuthorizationEvent;
+import com.freshplanet.ane.AppleMusic.events.AirAppleMusicCloudServiceEvent;
+import com.freshplanet.ane.AppleMusic.events.AirAppleMusicErrorEvent;
+import com.freshplanet.ane.AppleMusic.events.AirAppleMusicEvent;
+import com.freshplanet.ane.AppleMusic.events.AirAppleMusicCatalogSearchEvent;
 import flash.display.BitmapData;
 import flash.events.EventDispatcher;
 import flash.events.StatusEvent;
 import flash.external.ExtensionContext;
 import flash.system.Capabilities;
 
-public class AppleMusic extends EventDispatcher {
+public class AirAppleMusic extends EventDispatcher {
 
 	// --------------------------------------------------------------------------------------//
 	//																						 //
@@ -57,10 +59,10 @@ public class AppleMusic extends EventDispatcher {
     }
 
     /**
-     * AppleMusic instance
+     * AirAppleMusic instance
      */
-    static public function get instance():AppleMusic {
-		return _instance != null ? _instance : new AppleMusic()
+    static public function get instance():AirAppleMusic {
+		return _instance != null ? _instance : new AirAppleMusic()
 	}
 
 	/**
@@ -74,17 +76,17 @@ public class AppleMusic extends EventDispatcher {
 	/**
 	 * Get current Media Library authorization status
 	 */
-	public function get mediaLibraryAuthorizationStatus():AppleMusicAuthorizationStatus {
+	public function get mediaLibraryAuthorizationStatus():AirAppleMusicAuthorizationStatus {
 		var statusRaw:String = _extContext.call("mediaLibraryAuthorizationStatus") as String;
-		return AppleMusicAuthorizationStatus.fromValue(statusRaw);
+		return AirAppleMusicAuthorizationStatus.fromValue(statusRaw);
 	}
 
 	/**
 	 * Get current Cloud Service authorization status
 	 */
-	public function get cloudServiceAuthorizationStatus():AppleMusicAuthorizationStatus {
+	public function get cloudServiceAuthorizationStatus():AirAppleMusicAuthorizationStatus {
 		var statusRaw:String = _extContext.call("cloudServiceAuthorizationStatus") as String;
-		return AppleMusicAuthorizationStatus.fromValue(statusRaw);
+		return AirAppleMusicAuthorizationStatus.fromValue(statusRaw);
 	}
 
 	/**
@@ -111,12 +113,12 @@ public class AppleMusic extends EventDispatcher {
 	/**
 	 * Get songs from Media Library
 	 */
-	public function getMediaLibrarySongs():Vector.<AppleMusicSong> {
+	public function getMediaLibrarySongs():Vector.<AirAppleMusicSong> {
 		var itemsString:String = _extContext.call("getMediaLibrarySongs") as String;
-		var mediaLibrarySongs:Vector.<AppleMusicSong> = parseAppleMusicSongItemsArrayJSON(itemsString);
+		var mediaLibrarySongs:Vector.<AirAppleMusicSong> = parseAppleMusicSongItemsArrayJSON(itemsString);
 
 		for (var i:int = 0; i < mediaLibrarySongs.length; i++) {
-			var song:AppleMusicSong = mediaLibrarySongs[i];
+			var song:AirAppleMusicSong = mediaLibrarySongs[i];
 			song.artwork = _extContext.call("getMediaLibrarySongArtwork", song.id) as BitmapData;
 
 		}
@@ -124,15 +126,31 @@ public class AppleMusic extends EventDispatcher {
 		return mediaLibrarySongs;
 	}
 
+    /**
+	 * Get playlists from Media Library
+     */
+    public function getMediaLibraryPlaylists():Vector.<AirAppleMusicPlaylist> {
+        var itemsString:String = _extContext.call("getMediaLibraryPlaylists") as String;
+        var mediaLibraryPlaylists:Vector.<AirAppleMusicPlaylist> = parsePlaylistsItemsArrayJSON(itemsString);
+		return mediaLibraryPlaylists;
+    }
+
+    /**
+     * Get playlists from Media Library
+     */
+    public function addSongToPlaylist(playlist:AirAppleMusicPlaylist, song:AirAppleMusicSong):void {
+        _extContext.call("addToPlaylist", playlist.id, song.id, song.type.value);
+    }
+
 	/**
 	 * Play songs. Songs must be previously aquired through <code>getMediaLibrarySongs</code> or <code>performAppleMusicCatalogSearch</code>
 	 */
-	public function playSongs(songs:Vector.<AppleMusicSong>):void {
+	public function playSongs(songs:Vector.<AirAppleMusicSong>):void {
 		if(songs == null)
 			return;
 		var songIDsArray:Array = [];
 		for (var i:int = 0; i < songs.length; i++) {
-			var song:AppleMusicSong = songs[i];
+			var song:AirAppleMusicSong = songs[i];
 			songIDsArray.push(song.id);
 		}
 		_extContext.call("playSongs", songIDsArray);
@@ -176,15 +194,15 @@ public class AppleMusic extends EventDispatcher {
 	/**
 	 * Get current music player playback state
 	 */
-	public function get playbackState():AppleMusicPlaybackState {
+	public function get playbackState():AirAppleMusicPlaybackState {
 		var playbackStateRaw:String = _extContext.call("playbackState") as String;
-		return AppleMusicPlaybackState.fromValue(playbackStateRaw);
+		return AirAppleMusicPlaybackState.fromValue(playbackStateRaw);
 	}
 
 	/**
 	 * Get item currently playing in music player
 	 */
-	public function get nowPlayingItem():AppleMusicSong {
+	public function get nowPlayingItem():AirAppleMusicSong {
 		var itemString:String = _extContext.call("nowPlayingItem") as String;
 		if (itemString == null)
 			return null;
@@ -217,8 +235,8 @@ public class AppleMusic extends EventDispatcher {
 	// 																						 //
 	// --------------------------------------------------------------------------------------//
 
-	static private const EXTENSION_ID:String = "com.freshplanet.ane.AppleMusic";
-	static private var _instance:AppleMusic = null;
+	static private const EXTENSION_ID:String = "com.freshplanet.ane.AirAppleMusic";
+	static private var _instance:AirAppleMusic = null;
 
 	private var _extContext:ExtensionContext = null;
 	private var _logger:INativeLogger;
@@ -226,7 +244,7 @@ public class AppleMusic extends EventDispatcher {
 	/**
 	 * "private" singleton constructor
 	 */
-	public function AppleMusic() {
+	public function AirAppleMusic() {
 
 		super();
 
@@ -252,36 +270,45 @@ public class AppleMusic extends EventDispatcher {
 
         if (event.code == "log")
             _log(event.level);
-        else if (event.code == AppleMusicAuthorizationEvent.AUTHORIZATION_DID_UPDATE)
+        else if (event.code == AirAppleMusicAuthorizationEvent.AUTHORIZATION_DID_UPDATE)
         {
 
-	        var authorizationType:AppleMusicAuthorizationType = null;
-	        var authorizationStatus:AppleMusicAuthorizationStatus = null;
+	        var authorizationType:AirAppleMusicAuthorizationType = null;
+	        var authorizationStatus:AirAppleMusicAuthorizationStatus = null;
 	        try {
 	            var authorizationData : Object = JSON.parse(event.level);
-	            authorizationType = AppleMusicAuthorizationType.fromValue(authorizationData.type);
-	            authorizationStatus= AppleMusicAuthorizationStatus.fromValue(authorizationData.status);
+	            authorizationType = AirAppleMusicAuthorizationType.fromValue(authorizationData.type);
+	            authorizationStatus= AirAppleMusicAuthorizationStatus.fromValue(authorizationData.status);
 	        }
 	        catch (e:Error) {
 	            _log(e.message);
 	        }
 
-	        this.dispatchEvent(new AppleMusicAuthorizationEvent(AppleMusicAuthorizationEvent.AUTHORIZATION_DID_UPDATE, authorizationType, authorizationStatus));
+	        this.dispatchEvent(new AirAppleMusicAuthorizationEvent(AirAppleMusicAuthorizationEvent.AUTHORIZATION_DID_UPDATE, authorizationType, authorizationStatus));
         }
-        else if (event.code == AppleMusicCloudServiceEvent.CLOUD_SERVICE_DID_UPDATE)
+        else if (event.code == AirAppleMusicCloudServiceEvent.CLOUD_SERVICE_DID_UPDATE)
         {
-	        this.dispatchEvent(new AppleMusicCloudServiceEvent(AppleMusicCloudServiceEvent.CLOUD_SERVICE_DID_UPDATE));
+	        this.dispatchEvent(new AirAppleMusicCloudServiceEvent(AirAppleMusicCloudServiceEvent.CLOUD_SERVICE_DID_UPDATE));
         }
-        else if (event.code == AppleMusicEvent.MUSIC_PLAYER_DID_UPDATE_STATE || event.code == AppleMusicEvent.SUBSCRIPTION_TRIAL_NOT_ELIGIBLE || event.code == AppleMusicEvent.DID_DISMISS_SUBSCRIPTION_TRIAL_DIALOG)
+        else if (event.code == AirAppleMusicEvent.MUSIC_PLAYER_DID_UPDATE_STATE || event.code == AirAppleMusicEvent.SUBSCRIPTION_TRIAL_NOT_ELIGIBLE || event.code == AirAppleMusicEvent.DID_DISMISS_SUBSCRIPTION_TRIAL_DIALOG)
         {
-	        this.dispatchEvent(new AppleMusicEvent(event.code));
+	        this.dispatchEvent(new AirAppleMusicEvent(event.code));
         }
-        else if (event.code == AppleMusicCatalogSearchEvent.RECEIVED_SEARCH_RESULTS)
+        else if (event.code == AirAppleMusicCatalogSearchEvent.RECEIVED_SEARCH_RESULTS)
         {
 	        var resultsString:String = event.level;
-	        var searchResults:Vector.<AppleMusicSong> = parseAppleMusicSongItemsArrayJSON(resultsString);
-	        this.dispatchEvent(new AppleMusicCatalogSearchEvent(AppleMusicCatalogSearchEvent.RECEIVED_SEARCH_RESULTS, searchResults));
+	        var searchResults:Vector.<AirAppleMusicSong> = parseAppleMusicSongItemsArrayJSON(resultsString);
+	        this.dispatchEvent(new AirAppleMusicCatalogSearchEvent(AirAppleMusicCatalogSearchEvent.RECEIVED_SEARCH_RESULTS, searchResults));
         }
+        else if (
+				event.code == AirAppleMusicErrorEvent.ERROR_PERFORMING_APPLE_MUSIC_CATALOG_SEARCH ||
+				event.code == AirAppleMusicErrorEvent.ERROR_PERFORMING_STOREFRONTS_LOOKUP ||
+				event.code == AirAppleMusicErrorEvent.ERROR_PRESENTING_TRIAL_DIALOG ||
+				event.code == AirAppleMusicErrorEvent.ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES ||
+				event.code == AirAppleMusicErrorEvent.ERROR_ADDING_SONG_TO_PLAYLIST ||
+				event.code == AirAppleMusicErrorEvent.ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE
+		)
+            this.dispatchEvent(new AirAppleMusicErrorEvent(event.code, event.level));
         else
             this.dispatchEvent(event);
     }
@@ -304,27 +331,41 @@ public class AppleMusic extends EventDispatcher {
 	 * @param jsonString
 	 * @return
 	 */
-	private function parseAppleMusicSongItemsArrayJSON(jsonString:String):Vector.<AppleMusicSong> {
-
-		var result:Vector.<AppleMusicSong> = new <AppleMusicSong>[];
-
+	private function parseAppleMusicSongItemsArrayJSON(jsonString:String):Vector.<AirAppleMusicSong> {
+		var result:Vector.<AirAppleMusicSong> = new <AirAppleMusicSong>[];
 		var songsArray:Array = JSON.parse(jsonString) as Array;
 		for (var i:int = 0; i < songsArray.length; i++) {
 			var songObject:Object = songsArray[i];
-			result.push(new AppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height));
+			result.push(new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height));
 		}
 
 		return result;
 	}
+
+    /**
+     * Parse json playlist results array received from native implementation
+     * @param jsonString
+     * @return
+     */
+    private function parsePlaylistsItemsArrayJSON(jsonString:String):Vector.<AirAppleMusicPlaylist> {
+        var result:Vector.<AirAppleMusicPlaylist> = new <AirAppleMusicPlaylist>[];
+        var playlistsArray:Array = JSON.parse(jsonString) as Array;
+        for (var i:int = 0; i < playlistsArray.length; i++) {
+            var playlistObject:Object = playlistsArray[i];
+            result.push(new AirAppleMusicPlaylist(playlistObject.playlist_id, playlistObject.playlist_name));
+        }
+
+        return result;
+    }
 
 	/**
 	 * Parse json song received from native implementation
 	 * @param jsonString
 	 * @return
 	 */
-	private function parseAppleMusicSongItemJSON(jsonString:String):AppleMusicSong {
+	private function parseAppleMusicSongItemJSON(jsonString:String):AirAppleMusicSong {
 		var songObject:Object = JSON.parse(jsonString);
-		return new AppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height);
+		return new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height);
 	}
 
 	}

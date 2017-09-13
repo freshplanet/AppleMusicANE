@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.events {
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicAuthorizationStatus;
-import com.freshplanet.ane.AppleMusic.enums.AppleMusicAuthorizationType;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicAuthorizationStatus;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicAuthorizationType;
 
-public class AppleMusicAuthorizationEvent extends AppleMusicEvent {
+public class AirAppleMusicAuthorizationEvent extends AirAppleMusicEvent {
 
 	/**
 	 * Media Library or Cloud Service authorization changed
@@ -24,18 +24,18 @@ public class AppleMusicAuthorizationEvent extends AppleMusicEvent {
 	static public const AUTHORIZATION_DID_UPDATE :String = "AppleMusicAuthorizationEvent_authorizationDidUpdate";
 
 
-	private var _authorizationType:AppleMusicAuthorizationType;
-	private var _authorizationStatus:AppleMusicAuthorizationStatus;
+	private var _authorizationType:AirAppleMusicAuthorizationType;
+	private var _authorizationStatus:AirAppleMusicAuthorizationStatus;
 
 	/**
-	 * AppleMusicAuthorizationEvent
+	 * AirAppleMusicAuthorizationEvent
 	 * @param type
 	 * @param authorizationType
 	 * @param authorizationStatus
 	 * @param bubbles
 	 * @param cancelable
 	 */
-	public function AppleMusicAuthorizationEvent(type:String, authorizationType:AppleMusicAuthorizationType, authorizationStatus:AppleMusicAuthorizationStatus, bubbles:Boolean = false, cancelable:Boolean = false) {
+	public function AirAppleMusicAuthorizationEvent(type:String, authorizationType:AirAppleMusicAuthorizationType, authorizationStatus:AirAppleMusicAuthorizationStatus, bubbles:Boolean = false, cancelable:Boolean = false) {
 		super(type, bubbles, cancelable);
 		_authorizationType = authorizationType;
 		_authorizationStatus = authorizationStatus;
@@ -44,14 +44,14 @@ public class AppleMusicAuthorizationEvent extends AppleMusicEvent {
 	/**
 	 * Type of authorization that changed
 	 */
-	public function get authorizationType():AppleMusicAuthorizationType {
+	public function get authorizationType():AirAppleMusicAuthorizationType {
 		return _authorizationType;
 	}
 
 	/**
 	 * New status of authorization
 	 */
-	public function get authorizationStatus():AppleMusicAuthorizationStatus {
+	public function get authorizationStatus():AirAppleMusicAuthorizationStatus {
 		return _authorizationStatus;
 	}
 }

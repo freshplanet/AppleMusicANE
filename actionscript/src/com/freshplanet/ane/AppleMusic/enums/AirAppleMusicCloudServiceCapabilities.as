@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 package com.freshplanet.ane.AppleMusic.enums {
-public class AppleMusicCloudServiceCapabilities {
+public class AirAppleMusicCloudServiceCapabilities {
 
 	/**
 	 * No capabilities or undetermined
