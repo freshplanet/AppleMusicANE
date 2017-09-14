@@ -214,26 +214,43 @@
 
 - (void) requestStorefrontCountryCode {
     if ([NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){11,0,0}]) {
-        
+
         [_cloudServiceController requestStorefrontCountryCodeWithCompletionHandler:^(NSString * _Nullable storefrontCountryCode, NSError * _Nullable error) {
             if (error != nil) {
                 [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE level:error.localizedDescription];
-//                [self sendLog:[@"Error occured while requesting Storefront country code:" stringByAppendingString:error.localizedDescription]];
                 return;
             }
             _cloudServiceStorefrontCountryCode = storefrontCountryCode;
             [self sendEvent:kCloudServiceEvent_CLOUD_SERVICE_DID_UPDATE level:@""];
-            
+
         }];
     }
     else {
-        
+
         NSLocale *currentLocale = [NSLocale currentLocale];
         NSString *countryCode = [[currentLocale objectForKey:NSLocaleCountryCode] lowercaseString];
-        
+
         [self performAppleMusicStorefrontsLookup:countryCode ];
-        
+
     }
+
+//     if (@available(iOS 11.0, *)) {
+//         [_cloudServiceController requestStorefrontCountryCodeWithCompletionHandler:^(NSString * _Nullable storefrontCountryCode, NSError * _Nullable error) {
+//             if (error != nil) {
+//                 [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE level:error.localizedDescription];
+//                 return;
+//             }
+//             _cloudServiceStorefrontCountryCode = storefrontCountryCode;
+//             [self sendEvent:kCloudServiceEvent_CLOUD_SERVICE_DID_UPDATE level:@""];
+//
+//         }];
+//     } else {
+//         // Fallback on earlier versions
+//         NSLocale *currentLocale = [NSLocale currentLocale];
+//         NSString *countryCode = [[currentLocale objectForKey:NSLocaleCountryCode] lowercaseString];
+//
+//         [self performAppleMusicStorefrontsLookup:countryCode ];
+//     }
     
 }
 
@@ -310,7 +327,6 @@
           NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
           if (error != nil || httpResponse == nil || httpResponse.statusCode != 200 ) {
               [self sendEvent:kAirAppleMusicErrorEvent_ERROR_PERFORMING_APPLE_MUSIC_CATALOG_SEARCH level:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])];
-//              [self sendLog:[@"Error occured while performing Apple Music Catalog Search: " stringByAppendingString:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])]];
               return;
           }
           
@@ -363,64 +379,22 @@
 -(void) addSongToPlaylist :(NSString*) playlistID songID:(NSString*) songId songType:(NSString*) songType {
 
     [self sendLog:@"adding song to playlist"];
-//    [[MPMediaLibrary defaultMediaLibrary] addItemWithProductID:songId completionHandler:^(NSArray<__kindof MPMediaEntity *> * _Nonnull entities, NSError * _Nullable error) {
-//        if (error != nil) {
-//            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-//            return;
-//        }
-    
-        NSArray *playlists = [_currentMediaLibraryPlaylists filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
-            return [playlistID isEqualToString:[(NSNumber *)[object valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue]];
-        }]];
+    NSArray *playlists = [_currentMediaLibraryPlaylists filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+        return [playlistID isEqualToString:[(NSNumber *)[object valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue]];
+    }]];
 
-        if (playlists.count < 1) {
-            [self sendLog:@"no playlist error"];
-            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:[@"Could not find playlist with id " stringByAppendingString:playlistID]];
+    if (playlists.count != 1) {
+        [self sendLog:@"no playlist error"];
+        [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:[@"Could not find playlist with id " stringByAppendingString:playlistID]];
+    }
+    MPMediaPlaylist *playlist = playlists.firstObject;
+    [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+            return;
         }
-        MPMediaPlaylist *playlist = playlists.firstObject;
-        [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
-            if (error != nil) {
-                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-            }
-        }];
-    
-    
-//    [[MPMediaLibrary defaultMediaLibrary] getPlaylistWithUUID:[NSUUID UUID] creationMetadata:[[MPMediaPlaylistCreationMetadata alloc] initWithName:@"Classical Music"]  completionHandler:^(MPMediaPlaylist * _Nullable playlist, NSError * _Nullable error) {
-////        [self sendLog:[@"filtered playlist name is " stringByAppendingString:playlist.name]];
-////        if ([songType isEqualToString:kSongType_APPLE_MUSIC_CATALOG]) {
-////
-////            [self sendLog:@"Adding after delay"];
-//            if (error != nil) {
-//                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-//                return;
-//            }
-//            [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
-//                if (error != nil) {
-//                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-//                }
-//            }];
-//
-//        }];
-//
-    
-            
-
-//            [playlist addMediaItems:@[entities.firstObject] completionHandler:^(NSError * _Nullable error) {
-//                if (error != nil) {
-//                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-//                }
-//            }];
-//        }
-//        else { //([songType isEqualToString:kSongType_MEDIA_LIBRARY]) {
-//            MPMediaItem* mediaSong = [self getMediaItem:songId];
-//            [playlist addMediaItems:@[mediaSong] completionHandler:^(NSError * _Nullable error) {
-//                if (error != nil) {
-//                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-//                }
-//            }];
-//        }
-//    }];
-
+        [self sendLog:@"successfully added to playlist"];
+    }];
     
 }
 
@@ -460,7 +434,7 @@
     
     NSString *playlistName = [mediaPlaylist valueForProperty:MPMediaPlaylistPropertyName];
     NSString *playlistId = [(NSNumber *)[mediaPlaylist valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue];
-    
+   
     NSMutableDictionary *itemDict = [[NSMutableDictionary alloc] init];
     [itemDict setValue:playlistId != nil ? playlistId : @"" forKey:kPLAYLIST_ID];
     [itemDict setValue:playlistName != nil ? playlistName : @"No name" forKey:kPLAYLIST_NAME];
@@ -630,10 +604,6 @@ FREResult fillBitmapData(FREContext ctx, FREObject obj, UIImage *image)
     
     return result;
 }
-
-
-
-
 
 
 AppleMusic* GetAppleMusicContextNativeData(FREContext context) {
@@ -834,14 +804,30 @@ DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
         return nil;
     }
     
+    if ([SKCloudServiceController authorizationStatus] != SKCloudServiceAuthorizationStatusAuthorized) {
+        [controller sendLog:@"CloudService permission is not authorized"];
+        return nil;
+    }
+    
     MPMediaQuery *query = [MPMediaQuery playlistsQuery];
     NSArray *playlists = [query collections];
-     
-    [controller sendLog:[@"IN IOSSS number of playlists::" stringByAppendingString:[NSString stringWithFormat:@"%lu",(unsigned long)playlists.count]]];
-    [controller setCurrentMediaLibraryPlaylists:playlists];
-    NSString *playlistsJSONString = [controller playlistsToJSONString:playlists];
+    NSMutableArray *filteredPlaylists = [[NSMutableArray alloc] init];
+    for (MPMediaPlaylist* playlist in playlists) {
+        NSString *playlistTypeAttribute = [playlist valueForProperty:MPMediaPlaylistPropertyPlaylistAttributes];
+        if (!([playlistTypeAttribute integerValue] & MPMediaPlaylistAttributeSmart)) {
+            [filteredPlaylists addObject:playlist];
+        }
+    }
+    
+    [controller sendLog:[@"IN IOSSS number of playlists::" stringByAppendingString:[NSString stringWithFormat:@"%lu",(unsigned long)filteredPlaylists.count]]];
+    [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
+    NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
     return FPANE_NSStringToFREObject(playlistsJSONString);
     
+//        [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
+//        NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
+//        return FPANE_NSStringToFREObject(playlistsJSONString);
+//    return FPANE_NSStringToFREObject(@"[]");
 }
 
 DEFINE_ANE_FUNCTION(addToPlaylist) {
@@ -1034,6 +1020,16 @@ DEFINE_ANE_FUNCTION(getMediaLibrarySongArtwork) {
     
 }
 
+DEFINE_ANE_FUNCTION(openAppleMusicApp) {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"music://"]];
+    return nil;
+}
+
+DEFINE_ANE_FUNCTION(openAppleMusicSettings) {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"app-settings:root=MUSIC"]];
+    return nil;
+}
+
 void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FREContext ctx, uint32_t* numFunctionsToTest, const FRENamedFunction** functionsToSet) {
     
     AppleMusic* controller = [[AppleMusic alloc] initWithContext:ctx];
@@ -1059,7 +1055,9 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(playbackState, NULL),
         MAP_FUNCTION(nowPlayingItem, NULL),
         MAP_FUNCTION(performAppleMusicCatalogSearch, NULL),
-        MAP_FUNCTION(getMediaLibrarySongArtwork, NULL)
+        MAP_FUNCTION(getMediaLibrarySongArtwork, NULL),
+        MAP_FUNCTION(openAppleMusicApp, NULL),
+        MAP_FUNCTION(openAppleMusicSettings, NULL),
         
         
     };

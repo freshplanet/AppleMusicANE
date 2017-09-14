@@ -12,8 +12,8 @@
 
     <!-- A universally unique application identifier. Must be unique across all AIR applications.
          Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-    <id>com.freshplanet.applemusicdemo</id>
-    <!--<id>com.deloki.fortesting</id>-->
+    <!--<id>com.freshplanet.applemusicdemo</id>-->
+    <id>com.deloki.fortesting</id>
 
     <!-- Used as the filename for the application. Required. -->
     <filename>AppleMusic</filename>
@@ -195,8 +195,8 @@
             </array>
             <key>NSAppleMusicUsageDescription</key>
 	        <string>Demonstrating using StoreKit and MediaPlayer APIs.</string>
-	        <!--<key>MinimumOSVersion</key>-->
-            <!--<string>11.0</string>-->
+	        <key>MinimumOSVersion</key>
+            <string>9.3</string>
             <!--<key>UIStatusBarStyle</key>-->
             <!--<string>UIStatusBarStyleBlackOpaque</string>-->
             <!--<key>UIRequiresPersistentWiFi</key>-->

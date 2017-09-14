@@ -65,9 +65,11 @@ public class AppRoot extends LayoutGroup {
 		_uiView.addEventListener(UIView.SEARCH, onActionTriggered);
 		_uiView.addEventListener(UIView.PRESENT_TRIAL, onActionTriggered);
 		_uiView.addEventListener(UIView.GET_PLAYLISTS, onActionTriggered);
+		_uiView.addEventListener(UIView.OPEN_APPLE_MUSIC, onActionTriggered);
+		_uiView.addEventListener(UIView.OPEN_MUSIC_SETTINGS, onActionTriggered);
 
 		AirAppleMusic.logEnabled = true;
-		AirAppleMusic.instance.initialize("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlVXRTQ1REtXRjcifQ.eyJpc3MiOiIyRFFFMjQ1NUVQIiwiaWF0IjoxNTA1MjMyMjIwLCJleHAiOjE1MDUyNzU0MjB9.fYIJApiM8lu7v3n0O0mfnG5Pdhvh3qF3HcIMS2LwaubJuzg79dBODcBTyj_kz-Jg4xudbIT-d839BHqZaApvBg");
+		AirAppleMusic.instance.initialize("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlVXRTQ1REtXRjcifQ.eyJpc3MiOiIyRFFFMjQ1NUVQIiwiaWF0IjoxNTA1NDAyNjM0LCJleHAiOjE1MDU0NDU4MzR9.9e49JFnHlQzQGCb7GX0qXtwF3joCqkHvhCn5RKi07Se16CiVyuN_Si9MEAEyXBAS5lKs1GwmnCDw5ii2nWOG9w");
 		AirAppleMusic.instance.addEventListener(AirAppleMusicAuthorizationEvent.AUTHORIZATION_DID_UPDATE, onAuthorizationDidUpdate);
 		AirAppleMusic.instance.addEventListener(AirAppleMusicCloudServiceEvent.CLOUD_SERVICE_DID_UPDATE, onCloudServiceDidUpdate);
 		AirAppleMusic.instance.addEventListener(AirAppleMusicEvent.MUSIC_PLAYER_DID_UPDATE_STATE, onMusicPlayerDidUpdateState);
@@ -104,7 +106,7 @@ public class AppRoot extends LayoutGroup {
 		trace("GOT SEARCH RESULTS ", event.results.length);
         searchSongs = event.results;
 
-		var playlist:AirAppleMusicPlaylist = playlists[0];
+		var playlist:AirAppleMusicPlaylist = playlists[playlists.length-1];
 		var song:AirAppleMusicSong = searchSongs[0];
 		trace("Adding song : ", song.songName, " to playlist ", playlist.name);
 		trace("dasdas");
@@ -195,9 +197,14 @@ public class AppRoot extends LayoutGroup {
                 AirAppleMusic.instance.presentTrialDialogIfEligible();
 				break;
             case UIView.GET_PLAYLISTS:
-
                 playlists = AirAppleMusic.instance.getMediaLibraryPlaylists();
                 trace("playlists");
+                break;
+            case UIView.OPEN_APPLE_MUSIC:
+                AirAppleMusic.instance.openAppleMusic();
+                break;
+            case UIView.OPEN_MUSIC_SETTINGS:
+                AirAppleMusic.instance.openMusicSettings();
                 break;
 			default:
 				break;

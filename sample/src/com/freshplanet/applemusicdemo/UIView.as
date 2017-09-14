@@ -28,6 +28,8 @@ public class UIView extends PanelScreen {
 	public static const SEARCH:String = "SEARCH";
 	public static const PRESENT_TRIAL:String = "PRESENT_TRIAL";
 	public static const GET_PLAYLISTS:String = "GET_PLAYLISTS";
+	public static const OPEN_APPLE_MUSIC:String = "OPEN_APPLE_MUSIC";
+	public static const OPEN_MUSIC_SETTINGS:String = "OPEN_MUSIC_SETTINGS";
 
 	override protected function initialize():void {
 		super.initialize();
@@ -39,8 +41,6 @@ public class UIView extends PanelScreen {
 
 		var layoutData:AnchorLayoutData;
 		var button:Button;
-
-
 
 		layoutData = new AnchorLayoutData();
 		layoutData.top = spacing;
@@ -207,6 +207,30 @@ public class UIView extends PanelScreen {
         button = createButton("Get Playlists");
         button.layoutData = layoutData;
         button.name = GET_PLAYLISTS;
+        button.addEventListener(Event.TRIGGERED, onButtonTriggered);
+        addChild(button);
+
+        layoutData = new AnchorLayoutData();
+        layoutData.topAnchorDisplayObject = button;
+        layoutData.top = spacing;
+        layoutData.left = spacing;
+        layoutData.right = spacing;
+
+        button = createButton("Open Apple Music");
+        button.layoutData = layoutData;
+        button.name = OPEN_APPLE_MUSIC;
+        button.addEventListener(Event.TRIGGERED, onButtonTriggered);
+        addChild(button);
+
+        layoutData = new AnchorLayoutData();
+        layoutData.topAnchorDisplayObject = button;
+        layoutData.top = spacing;
+        layoutData.left = spacing;
+        layoutData.right = spacing;
+
+        button = createButton("Open Music Settings");
+        button.layoutData = layoutData;
+        button.name = OPEN_MUSIC_SETTINGS;
         button.addEventListener(Event.TRIGGERED, onButtonTriggered);
         addChild(button);
 

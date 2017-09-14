@@ -229,6 +229,20 @@ public class AirAppleMusic extends EventDispatcher {
 		_extContext.call("presentTrialDialogIfEligible", affiliateKey == null ? "" : affiliateKey, affiliateCampaignKey == null ? "" : affiliateCampaignKey);
 	}
 
+    /**
+     * Open Apple Music app
+     */
+    public function openAppleMusic():void {
+        _extContext.call("openAppleMusicApp");
+    }
+
+    /**
+     * Open application Music Settings
+     */
+    public function openMusicSettings():void {
+        _extContext.call("openAppleMusicSettings");
+    }
+
 	// --------------------------------------------------------------------------------------//
 	//																						 //
 	// 									 	PRIVATE API										 //
@@ -332,6 +346,8 @@ public class AirAppleMusic extends EventDispatcher {
 	 * @return
 	 */
 	private function parseAppleMusicSongItemsArrayJSON(jsonString:String):Vector.<AirAppleMusicSong> {
+        if(!jsonString)
+            return null;
 		var result:Vector.<AirAppleMusicSong> = new <AirAppleMusicSong>[];
 		var songsArray:Array = JSON.parse(jsonString) as Array;
 		for (var i:int = 0; i < songsArray.length; i++) {
@@ -348,7 +364,9 @@ public class AirAppleMusic extends EventDispatcher {
      * @return
      */
     private function parsePlaylistsItemsArrayJSON(jsonString:String):Vector.<AirAppleMusicPlaylist> {
-        var result:Vector.<AirAppleMusicPlaylist> = new <AirAppleMusicPlaylist>[];
+        if(!jsonString)
+			return null;
+		var result:Vector.<AirAppleMusicPlaylist> = new <AirAppleMusicPlaylist>[];
         var playlistsArray:Array = JSON.parse(jsonString) as Array;
         for (var i:int = 0; i < playlistsArray.length; i++) {
             var playlistObject:Object = playlistsArray[i];
@@ -364,6 +382,8 @@ public class AirAppleMusic extends EventDispatcher {
 	 * @return
 	 */
 	private function parseAppleMusicSongItemJSON(jsonString:String):AirAppleMusicSong {
+        if(!jsonString)
+            return null;
 		var songObject:Object = JSON.parse(jsonString);
 		return new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height);
 	}
