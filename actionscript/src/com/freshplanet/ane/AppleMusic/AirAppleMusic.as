@@ -48,7 +48,11 @@ public class AirAppleMusic extends EventDispatcher {
 	 * Is the ANE supported on the current platform
 	 */
 	static public function get isSupported():Boolean {
-        return Capabilities.manufacturer.indexOf("iOS") > -1;
+        return  isIOS && instance.isIOSVersionAtLeast103;
+	}
+
+	public function get isIOSVersionAtLeast103():Boolean {
+		return _extContext.call("isSupported");
 	}
 
 	/**
@@ -136,11 +140,18 @@ public class AirAppleMusic extends EventDispatcher {
     }
 
     /**
-     * Get playlists from Media Library
+     * Add song to playlist
      */
     public function addSongToPlaylist(playlist:AirAppleMusicPlaylist, song:AirAppleMusicSong):void {
         _extContext.call("addToPlaylist", playlist.id, song.id, song.type.value);
     }
+
+	/**
+	 * Get playlists from Media Library
+	 */
+	public function addSongToPlaylistById(playlistId:String, songId:String, songType:AirAppleMusicSongType):void {
+		_extContext.call("addToPlaylist", playlistId, songId, songType.value);
+	}
 
 	/**
 	 * Play songs. Songs must be previously aquired through <code>getMediaLibrarySongs</code> or <code>performAppleMusicCatalogSearch</code>
@@ -154,6 +165,15 @@ public class AirAppleMusic extends EventDispatcher {
 			songIDsArray.push(song.id);
 		}
 		_extContext.call("playSongs", songIDsArray);
+	}
+
+	/**
+	 * Play Apple Music API songs by id
+	 */
+	public function playSongsByProductId(songIDs:Array):void {
+		if(songIDs == null)
+			return;
+		_extContext.call("playSongsByProductId", songIDs);
 	}
 
 	/**
@@ -268,7 +288,7 @@ public class AirAppleMusic extends EventDispatcher {
 		_extContext = ExtensionContext.createExtensionContext(EXTENSION_ID, null);
 		_extContext.addEventListener(StatusEvent.STATUS, _handleStatusEvent);
 
-		if (isSupported)
+		if (isIOS)
 			_logger = new NativeLogger(_extContext);
 		else
 			_logger = new DefaultLogger();
@@ -338,6 +358,10 @@ public class AirAppleMusic extends EventDispatcher {
 			trace.apply(null, strings);
 		}
 
+	}
+
+	private static function get isIOS():Boolean {
+		return Capabilities.manufacturer.indexOf("iOS") > -1;
 	}
 
 	/**

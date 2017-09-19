@@ -222,7 +222,7 @@
             }
             _cloudServiceStorefrontCountryCode = storefrontCountryCode;
             [self sendEvent:kCloudServiceEvent_CLOUD_SERVICE_DID_UPDATE level:@""];
-
+            
         }];
     }
     else {
@@ -233,24 +233,6 @@
         [self performAppleMusicStorefrontsLookup:countryCode ];
 
     }
-
-//     if (@available(iOS 11.0, *)) {
-//         [_cloudServiceController requestStorefrontCountryCodeWithCompletionHandler:^(NSString * _Nullable storefrontCountryCode, NSError * _Nullable error) {
-//             if (error != nil) {
-//                 [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE level:error.localizedDescription];
-//                 return;
-//             }
-//             _cloudServiceStorefrontCountryCode = storefrontCountryCode;
-//             [self sendEvent:kCloudServiceEvent_CLOUD_SERVICE_DID_UPDATE level:@""];
-//
-//         }];
-//     } else {
-//         // Fallback on earlier versions
-//         NSLocale *currentLocale = [NSLocale currentLocale];
-//         NSString *countryCode = [[currentLocale objectForKey:NSLocaleCountryCode] lowercaseString];
-//
-//         [self performAppleMusicStorefrontsLookup:countryCode ];
-//     }
     
 }
 
@@ -259,6 +241,7 @@
         [self sendLog:@"Please set the developer token first"];
         return;
     }
+    
     NSURLComponents *urlComponents = [NSURLComponents new];
     urlComponents.scheme = @"https";
     urlComponents.host = kAppleMusicAPIBaseURLString;
@@ -415,8 +398,10 @@
     NSString *artistName = [mediaItem valueForProperty:MPMediaItemPropertyArtist];
     NSString *albumName = [mediaItem valueForProperty:MPMediaItemPropertyAlbumTitle];
     NSString *songName = [mediaItem valueForProperty:MPMediaItemPropertyTitle];
-    NSString *songId = [(NSNumber *)[mediaItem valueForProperty:MPMediaItemPropertyPersistentID] stringValue];
+    NSString *songId = [type isEqualToString:kSongType_MEDIA_LIBRARY] ? [(NSNumber *)[mediaItem valueForProperty:MPMediaItemPropertyPersistentID] stringValue] : mediaItem.playbackStoreID;
     NSNumber *duration = [mediaItem valueForProperty:MPMediaItemPropertyPlaybackDuration];
+    
+    
     
     NSMutableDictionary *itemDict = [[NSMutableDictionary alloc] init];
     [itemDict setValue:artistName != nil ? artistName : @"" forKey:kARTIST_NAME];
@@ -611,6 +596,15 @@ AppleMusic* GetAppleMusicContextNativeData(FREContext context) {
     CFTypeRef controller;
     FREGetContextNativeData(context, (void**)&controller);
     return (__bridge AppleMusic*)controller;
+}
+
+DEFINE_ANE_FUNCTION(isSupported) {
+    
+    bool isSupported = false;
+    if ([NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){10,3,0}]) {
+        isSupported = true;
+    }
+    return FPANE_BOOLToFREObject(isSupported);
 }
 
 DEFINE_ANE_FUNCTION(initialize) {
@@ -824,10 +818,6 @@ DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
     NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
     return FPANE_NSStringToFREObject(playlistsJSONString);
     
-//        [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
-//        NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
-//        return FPANE_NSStringToFREObject(playlistsJSONString);
-//    return FPANE_NSStringToFREObject(@"[]");
 }
 
 DEFINE_ANE_FUNCTION(addToPlaylist) {
@@ -839,6 +829,8 @@ DEFINE_ANE_FUNCTION(addToPlaylist) {
         [controller sendLog:@"MediaLibrary permission is not authorized"];
         return nil;
     }
+    
+    
     
     @try {
         NSString* playlistID = FPANE_FREObjectToNSString(argv[0]);
@@ -861,6 +853,37 @@ DEFINE_ANE_FUNCTION(playSongs) {
     
     if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
         [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    if ([SKCloudServiceController authorizationStatus] != SKCloudServiceAuthorizationStatusAuthorized) {
+        [controller sendLog:@"CloudService permission is not authorized"];
+        return nil;
+    }
+    
+    @try {
+        NSArray* mediaLibrarySongIDs = FPANE_FREObjectToNSArrayOfNSString((argv[0]));
+        [controller beginPlayback:mediaLibrarySongIDs];
+    }
+    @catch (NSException *exception) {
+        [controller sendLog:[@"Exception occured while trying to play media library songs : " stringByAppendingString:exception.reason]];
+    }
+    
+    return nil;
+}
+
+DEFINE_ANE_FUNCTION(playSongsByProductId) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
+        [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    if ([SKCloudServiceController authorizationStatus] != SKCloudServiceAuthorizationStatusAuthorized) {
+        [controller sendLog:@"CloudService permission is not authorized"];
         return nil;
     }
     
@@ -1036,6 +1059,7 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     FRESetContextNativeData(ctx, (void*)CFBridgingRetain(controller));
     
     static FRENamedFunction functions[] = {
+        MAP_FUNCTION(isSupported, NULL),
         MAP_FUNCTION(initialize, NULL),
         MAP_FUNCTION(presentTrialDialogIfEligible, NULL),
         MAP_FUNCTION(mediaLibraryAuthorizationStatus, NULL),
@@ -1047,6 +1071,7 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(getMediaLibraryPlaylists, NULL),
         MAP_FUNCTION(addToPlaylist, NULL),
         MAP_FUNCTION(playSongs, NULL),
+        MAP_FUNCTION(playSongsByProductId, NULL),
         MAP_FUNCTION(togglePlayPause, NULL),
         MAP_FUNCTION(skipToNextSong, NULL),
         MAP_FUNCTION(skipToPreviousSong, NULL),

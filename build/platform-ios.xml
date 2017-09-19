@@ -1,10 +1,10 @@
 <platform xmlns="http://ns.adobe.com/air/extension/22.0">
     <sdkVersion>9.3</sdkVersion>
     <linkerOptions>
-        <option>-framework MediaPlayer</option>
-        <option>-framework UserNotifications</option>
-        <option>-framework FileProvider</option>
-        <option>-framework ReplayKit</option>
-        <option>-framework UIKit</option>
+        <!--<option>-framework MediaPlayer</option>-->
+        <!--<option>-framework UserNotifications</option>-->
+        <!--<option>-framework FileProvider</option>-->
+        <!--<option>-framework ReplayKit</option>-->
+        <!--<option>-framework UIKit</option>-->
     </linkerOptions>
 </platform>

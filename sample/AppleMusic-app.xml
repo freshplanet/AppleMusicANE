@@ -8,12 +8,11 @@
 
      minimumPatchLevel - The minimum patch level of the AIR runtime required to run the application. Optional. -->
 
-<application xmlns="http://ns.adobe.com/air/application/26.0">
+<application xmlns="http://ns.adobe.com/air/application/22.0">
 
     <!-- A universally unique application identifier. Must be unique across all AIR applications.
          Using a reverse DNS-style name as the id is recommended. (Eg. com.example.ExampleApplication.) Required. -->
-    <!--<id>com.freshplanet.applemusicdemo</id>-->
-    <id>com.deloki.fortesting</id>
+    <id>com.freshplanet.applemusicdemo</id>
 
     <!-- Used as the filename for the application. Required. -->
     <filename>AppleMusic</filename>

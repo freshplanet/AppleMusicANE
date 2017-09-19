@@ -9,6 +9,7 @@ import com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicPlaylist;
 import com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicSong;
 import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicCloudServiceCapabilities;
 import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicPlaybackState;
+import com.freshplanet.ane.AppleMusic.enums.AirAppleMusicSongType;
 import com.freshplanet.ane.AppleMusic.events.AirAppleMusicAuthorizationEvent;
 import com.freshplanet.ane.AppleMusic.events.AirAppleMusicCatalogSearchEvent;
 import com.freshplanet.ane.AppleMusic.events.AirAppleMusicCloudServiceEvent;
@@ -69,7 +70,7 @@ public class AppRoot extends LayoutGroup {
 		_uiView.addEventListener(UIView.OPEN_MUSIC_SETTINGS, onActionTriggered);
 
 		AirAppleMusic.logEnabled = true;
-		AirAppleMusic.instance.initialize("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlVXRTQ1REtXRjcifQ.eyJpc3MiOiIyRFFFMjQ1NUVQIiwiaWF0IjoxNTA1NDAyNjM0LCJleHAiOjE1MDU0NDU4MzR9.9e49JFnHlQzQGCb7GX0qXtwF3joCqkHvhCn5RKi07Se16CiVyuN_Si9MEAEyXBAS5lKs1GwmnCDw5ii2nWOG9w");
+		AirAppleMusic.instance.initialize("eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IkZHWTlWODNGV00ifQ.eyJpc3MiOiIyRFFFMjQ1NUVQIiwiaWF0IjoxNTA1NzQ3MDU5LCJleHAiOjE1MDY2Njg2NTl9.rWKArj6QkHb5c_pfZ6PFhd_DL7u2Vgd4O2_zrnjOWyIwuG2YiK1gjl7EVMEebXs66EXc3NJJC0_g_qNoruVirg");
 		AirAppleMusic.instance.addEventListener(AirAppleMusicAuthorizationEvent.AUTHORIZATION_DID_UPDATE, onAuthorizationDidUpdate);
 		AirAppleMusic.instance.addEventListener(AirAppleMusicCloudServiceEvent.CLOUD_SERVICE_DID_UPDATE, onCloudServiceDidUpdate);
 		AirAppleMusic.instance.addEventListener(AirAppleMusicEvent.MUSIC_PLAYER_DID_UPDATE_STATE, onMusicPlayerDidUpdateState);
@@ -99,24 +100,15 @@ public class AppRoot extends LayoutGroup {
 		trace("onDidDismissSubscriptionTrialDialog");
 	}
 
-	var searchSongs:Vector.<com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicSong>;
-    var playlists:Vector.<com.freshplanet.ane.AppleMusic.VOs.AirAppleMusicPlaylist>;
+
 
 	private function onReceivedAppleMusicSearchResults(event:AirAppleMusicCatalogSearchEvent):void {
 		trace("GOT SEARCH RESULTS ", event.results.length);
-        searchSongs = event.results;
-
-		var playlist:AirAppleMusicPlaylist = playlists[playlists.length-1];
-		var song:AirAppleMusicSong = searchSongs[0];
-		trace("Adding song : ", song.songName, " to playlist ", playlist.name);
-		trace("dasdas");
-//		AirAppleMusic.instance.playSongs(new <AirAppleMusicSong>[song]);
-		AirAppleMusic.instance.addSongToPlaylist(playlist, song);
-//		AirAppleMusic.instance.playSongs(event.results);
 	}
 
 	private function onMusicPlayerDidUpdateState(event:AirAppleMusicEvent):void {
-		trace("MUSIC PLAYER DID UPDATE STATE");
+		trace("MUSIC PLAYER DID UPDATE STATE ", AirAppleMusic.instance.playbackState.value);
+
 		// check playing status, now playing item
 	}
 
@@ -166,7 +158,7 @@ public class AppRoot extends LayoutGroup {
                 AirAppleMusic.instance.playSongs(songs);
 				break;
 			case UIView.TOGGLE_PLAY_PAUSE:
-                AirAppleMusic.instance.togglePlayPause;
+                AirAppleMusic.instance.togglePlayPause();
 				break;
 			case UIView.SKIP:
                 AirAppleMusic.instance.skipToNextSong();
@@ -195,10 +187,10 @@ public class AppRoot extends LayoutGroup {
 				break;
 			case UIView.PRESENT_TRIAL:
                 AirAppleMusic.instance.presentTrialDialogIfEligible();
+
 				break;
             case UIView.GET_PLAYLISTS:
-                playlists = AirAppleMusic.instance.getMediaLibraryPlaylists();
-                trace("playlists");
+                var playlists:Vector.<AirAppleMusicPlaylist> = AirAppleMusic.instance.getMediaLibraryPlaylists();
                 break;
             case UIView.OPEN_APPLE_MUSIC:
                 AirAppleMusic.instance.openAppleMusic();
