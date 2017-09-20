@@ -72,7 +72,6 @@
     [_cloudServiceController requestCapabilitiesWithCompletionHandler:^(SKCloudServiceCapability capabilities, NSError * _Nullable error) {
         if (error != nil) {
             [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES level:error.localizedDescription];
-//            [self sendLog:[@"Error occured while requesting cloud service capabilities:" stringByAppendingString:error.localizedDescription]];
             return;
         }
         
@@ -181,11 +180,9 @@
         NSMutableDictionary *optionKeys = [[NSMutableDictionary alloc] init]; 
         [optionKeys setValue:SKCloudServiceSetupActionSubscribe forKey:SKCloudServiceSetupOptionsActionKey];
         if (affiliateKey != nil && ![affiliateKey isEqualToString:@""]) {
-            [self sendLog:@"setting SKCloudServiceSetupOptionsAffiliateTokenKey"];
             [optionKeys setValue:affiliateKey forKey:SKCloudServiceSetupOptionsAffiliateTokenKey];
         }
         if (affiliateCampaignKey != nil && ![affiliateCampaignKey isEqualToString:@""]) {
-            [self sendLog:@"setting SKCloudServiceSetupOptionsCampaignTokenKey"];
             [optionKeys setValue:affiliateCampaignKey forKey:SKCloudServiceSetupOptionsCampaignTokenKey];
         }
         
@@ -193,7 +190,6 @@
         [setupController loadWithOptions:optionKeys completionHandler:^(BOOL result, NSError * _Nullable error) {
             if (error != nil) {
                 [self sendEvent:kAirAppleMusicErrorEvent_ERROR_PRESENTING_TRIAL_DIALOG level:error.localizedDescription];
-//                [self sendLog:[@"Error occured while trying to present trial dialog:" stringByAppendingString:error.localizedDescription]];
                 return;
             }
             
@@ -258,7 +254,6 @@
         NSError * _Nullable error) {
           NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *) response;
           if (error != nil || httpResponse == nil || httpResponse.statusCode != 200 ) {
-//              [self sendLog:[@"Error occured while performing Apple Music Storefronts Lookup:" stringByAppendingString:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])]];
               [self sendEvent:kAirAppleMusicErrorEvent_ERROR_PERFORMING_STOREFRONTS_LOOKUP level:(error != nil ? error.localizedDescription : [@"Http response error. Status code: " stringByAppendingString:[NSString stringWithFormat:@"%i", httpResponse.statusCode]])];
               return;
           }
@@ -282,8 +277,6 @@
         [self sendLog:@"Please set the developer token first"];
         return;
     }
-    
-    [self sendLog:[@"_cloudServiceStorefrontCountryCode : " stringByAppendingString:_cloudServiceStorefrontCountryCode == nil ? @"NULL" : _cloudServiceStorefrontCountryCode]];
     
     NSURLComponents *urlComponents = [NSURLComponents new];
     urlComponents.scheme = @"https";
@@ -360,14 +353,12 @@
 }
 
 -(void) addSongToPlaylist :(NSString*) playlistID songID:(NSString*) songId songType:(NSString*) songType {
-
-    [self sendLog:@"adding song to playlist"];
+    
     NSArray *playlists = [_currentMediaLibraryPlaylists filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
         return [playlistID isEqualToString:[(NSNumber *)[object valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue]];
     }]];
 
     if (playlists.count != 1) {
-        [self sendLog:@"no playlist error"];
         [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:[@"Could not find playlist with id " stringByAppendingString:playlistID]];
     }
     MPMediaPlaylist *playlist = playlists.firstObject;
@@ -376,7 +367,6 @@
             [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
             return;
         }
-        [self sendLog:@"successfully added to playlist"];
     }];
     
 }
@@ -387,7 +377,7 @@
                                                        options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
                                                          error:&error];
     if (! jsonData) {
-        return @"";
+        return @"{}";
     } else {
         return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }
@@ -464,20 +454,15 @@
 - (NSString*) arrayToNSString:(NSArray*) array{
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:array
-                                                       options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
+                                                       options:0 // Pass 0 if you don't care about the readability of the generated string
                                                          error:&error];
     if (! jsonData) {
-        return @"";
+        return @"[]";
     } else {
-        return [self JSONString:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }
 }
 
--(NSString *)JSONString:(NSString *)aString {
-    NSMutableString *s = [NSMutableString stringWithString:aString];
-    [s replaceOccurrencesOfString:@"’" withString:@"'" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [s length])];
-    return [NSString stringWithString:s];
-}
 
 @end
 
@@ -813,7 +798,7 @@ DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
         }
     }
     
-    [controller sendLog:[@"IN IOSSS number of playlists::" stringByAppendingString:[NSString stringWithFormat:@"%lu",(unsigned long)filteredPlaylists.count]]];
+    
     [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
     NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
     return FPANE_NSStringToFREObject(playlistsJSONString);
