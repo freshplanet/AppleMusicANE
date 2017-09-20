@@ -149,7 +149,7 @@ FREObject FPANE_DoubleToFREObject(double d)
 FREObject FPANE_NSStringToFREObject(NSString *string)
 {
     FREObject result;
-    FRENewObjectFromUTF8((int)string.length, (const uint8_t *)[string UTF8String], &result);
+    FRENewObjectFromUTF8((uint32_t)strlen(string.UTF8String)+1, (const uint8_t*)string.UTF8String, &result);
     return result;
 }
 
