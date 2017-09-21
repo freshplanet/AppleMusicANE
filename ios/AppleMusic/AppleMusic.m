@@ -28,6 +28,7 @@
         _musicPlayerController = [MPMusicPlayerController systemMusicPlayer];
         [_musicPlayerController beginGeneratingPlaybackNotifications];
         
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(handleMusicPlayerControllerNowPlayingItemDidChange)
                                                      name:MPMusicPlayerControllerNowPlayingItemDidChangeNotification
@@ -37,9 +38,18 @@
                                                  selector:@selector(handleMusicPlayerControllerPlaybackStateDidChange)
                                                      name:MPMusicPlayerControllerPlaybackStateDidChangeNotification
                                                    object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleCapabilitiesChangedNotification)
+                                                     name:SKCloudServiceCapabilitiesDidChangeNotification
+                                                   object:nil];
     }
     
     return self;
+}
+
+-(void)handleCapabilitiesChangedNotification {
+    [self requestCloudServiceCapabilities];
 }
 
 -(void) dealloc {
@@ -69,6 +79,7 @@
 }
 
 - (void) requestCloudServiceCapabilities {
+    
     [_cloudServiceController requestCapabilitiesWithCompletionHandler:^(SKCloudServiceCapability capabilities, NSError * _Nullable error) {
         if (error != nil) {
             [self sendEvent:kAirAppleMusicErrorEvent_ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES level:error.localizedDescription];
@@ -209,6 +220,9 @@
 }
 
 - (void) requestStorefrontCountryCode {
+    // default to "us"
+    _cloudServiceStorefrontCountryCode = @"us";
+    
     if ([NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){11,0,0}]) {
 
         [_cloudServiceController requestStorefrontCountryCodeWithCompletionHandler:^(NSString * _Nullable storefrontCountryCode, NSError * _Nullable error) {
