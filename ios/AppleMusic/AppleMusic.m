@@ -815,13 +815,18 @@ DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
     MPMediaQuery *query = [MPMediaQuery playlistsQuery];
     NSArray *playlists = [query collections];
     NSMutableArray *filteredPlaylists = [[NSMutableArray alloc] init];
+    int counter = 0;
     for (MPMediaPlaylist* playlist in playlists) {
         NSString *playlistTypeAttribute = [playlist valueForProperty:MPMediaPlaylistPropertyPlaylistAttributes];
         if (!([playlistTypeAttribute integerValue] & MPMediaPlaylistAttributeSmart)) {
             [filteredPlaylists addObject:playlist];
+            counter = counter + 1;
+        }
+        // testing with 20 cap (no playlists issue)
+        if (counter == 20) {
+            break;
         }
     }
-    
     
     [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
     NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
@@ -1054,7 +1059,10 @@ DEFINE_ANE_FUNCTION(getMediaLibrarySongArtwork) {
 }
 
 DEFINE_ANE_FUNCTION(openAppleMusicApp) {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"music://"]];
+
+    UIApplication *application = [UIApplication sharedApplication];
+    NSURL *URL = [NSURL URLWithString:@"music://"];
+    [application openURL:URL];
     return nil;
 }
 
