@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#import "FPANEUtils.h"
+#import "FPANEUtilsAM.h"
 
 #pragma mark - Dispatch events
 
@@ -146,10 +146,10 @@ FREObject FPANE_DoubleToFREObject(double d)
     return result;
 }
 
-FREObject FPANE_NSStringToFREObject(NSString *string)
+FREObject FPANE_NSStringToFREObjectAM(NSString *string)
 {
     FREObject result;
-    FRENewObjectFromUTF8((uint32_t)strlen(string.UTF8String)+1, (const uint8_t*)string.UTF8String, &result);
+    FRENewObjectFromUTF8((int)strlen(string.UTF8String), (const uint8_t*)string.UTF8String, &result);
     return result;
 }
 
@@ -162,7 +162,7 @@ FREObject FPANE_CreateError( NSString* error, NSInteger* id )
     FREObject freId;
     FRENewObjectFromInt32( (int32_t)*id, &freId);
     FREObject argV[] = {
-        FPANE_NSStringToFREObject(error),
+        FPANE_NSStringToFREObjectAM(error),
         freId
     };
     FRENewObject((const uint8_t*)"Error", 2, argV, &ret, &errorThrown);

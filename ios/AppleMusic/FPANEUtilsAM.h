@@ -36,6 +36,6 @@ FREObject FPANE_BOOLToFREObject(BOOL boolean);
 FREObject FPANE_IntToFREObject(NSInteger i);
 FREObject FPANE_UIntToFREObject(NSUInteger i);
 FREObject FPANE_DoubleToFREObject(double d);
-FREObject FPANE_NSStringToFREObject(NSString *string);
+FREObject FPANE_NSStringToFREObjectAM(NSString *string);
 
 FREObject FPANE_CreateError( NSString* error, NSInteger* id );

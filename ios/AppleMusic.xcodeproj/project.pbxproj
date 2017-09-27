@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		A24EDBF81EFC1B1400EE62D3 /* AppleMusic.m in Sources */ = {isa = PBXBuildFile; fileRef = A24EDBF71EFC1B1400EE62D3 /* AppleMusic.m */; };
 		A24EDBF91EFC1B1400EE62D3 /* AppleMusic.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A24EDBF61EFC1B1400EE62D3 /* AppleMusic.h */; };
-		A2BF28A31EFC32DD0088C3D6 /* FPANEUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BF28A11EFC2BDE0088C3D6 /* FPANEUtils.m */; };
+		A2BF28A31EFC32DD0088C3D6 /* FPANEUtilsAM.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BF28A11EFC2BDE0088C3D6 /* FPANEUtilsAM.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,8 +31,8 @@
 		A24EDBF71EFC1B1400EE62D3 /* AppleMusic.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppleMusic.m; sourceTree = "<group>"; };
 		A24EDC091EFC28FA00EE62D3 /* Constants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Constants.h; sourceTree = "<group>"; };
 		A2BF289F1EFC2BD00088C3D6 /* FlashRuntimeExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlashRuntimeExtensions.h; sourceTree = "<group>"; };
-		A2BF28A01EFC2BDE0088C3D6 /* FPANEUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPANEUtils.h; sourceTree = "<group>"; };
-		A2BF28A11EFC2BDE0088C3D6 /* FPANEUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FPANEUtils.m; sourceTree = "<group>"; };
+		A2BF28A01EFC2BDE0088C3D6 /* FPANEUtilsAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FPANEUtilsAM.h; sourceTree = "<group>"; };
+		A2BF28A11EFC2BDE0088C3D6 /* FPANEUtilsAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FPANEUtilsAM.m; sourceTree = "<group>"; };
 		FA4F82A71F699FC000F4E077 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -68,8 +68,8 @@
 			isa = PBXGroup;
 			children = (
 				A2BF289F1EFC2BD00088C3D6 /* FlashRuntimeExtensions.h */,
-				A2BF28A01EFC2BDE0088C3D6 /* FPANEUtils.h */,
-				A2BF28A11EFC2BDE0088C3D6 /* FPANEUtils.m */,
+				A2BF28A01EFC2BDE0088C3D6 /* FPANEUtilsAM.h */,
+				A2BF28A11EFC2BDE0088C3D6 /* FPANEUtilsAM.m */,
 				A24EDBF61EFC1B1400EE62D3 /* AppleMusic.h */,
 				A24EDBF71EFC1B1400EE62D3 /* AppleMusic.m */,
 				A24EDC091EFC28FA00EE62D3 /* Constants.h */,
@@ -141,7 +141,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2BF28A31EFC32DD0088C3D6 /* FPANEUtils.m in Sources */,
+				A2BF28A31EFC32DD0088C3D6 /* FPANEUtilsAM.m in Sources */,
 				A24EDBF81EFC1B1400EE62D3 /* AppleMusic.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

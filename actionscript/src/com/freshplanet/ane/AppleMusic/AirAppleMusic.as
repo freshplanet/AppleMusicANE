@@ -108,6 +108,13 @@ public class AirAppleMusic extends EventDispatcher {
 	}
 
 	/**
+	 * Request Cloud Service capabilities from service
+	 */
+	public function requestCloudServiceCapabilities():void {
+		_extContext.call("requestCloudServiceCapabilities");
+	}
+
+	/**
 	 * Get Cloud Service Storefront country code
 	 */
 	public function get cloudServiceStorefrontCountryCode():String {

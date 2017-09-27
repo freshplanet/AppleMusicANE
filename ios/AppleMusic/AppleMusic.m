@@ -27,6 +27,7 @@
         _cloudServiceStorefrontCountryCode = @"";
         _musicPlayerController = [MPMusicPlayerController systemMusicPlayer];
         [_musicPlayerController beginGeneratingPlaybackNotifications];
+        [_musicPlayerController prepareToPlay];
         
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -663,7 +664,7 @@ DEFINE_ANE_FUNCTION(mediaLibraryAuthorizationStatus) {
             status = kAuthorizationStatus_NOT_DETERMINED;
             break;
     }
-    return FPANE_NSStringToFREObject(status);
+    return FPANE_NSStringToFREObjectAM(status);
 }
 
 DEFINE_ANE_FUNCTION(cloudServiceAuthorizationStatus) {
@@ -685,7 +686,7 @@ DEFINE_ANE_FUNCTION(cloudServiceAuthorizationStatus) {
             status = kAuthorizationStatus_NOT_DETERMINED;
             break;
     }
-    return FPANE_NSStringToFREObject(status);
+    return FPANE_NSStringToFREObjectAM(status);
 }
 
 DEFINE_ANE_FUNCTION(requestAuthorization) {
@@ -761,13 +762,22 @@ DEFINE_ANE_FUNCTION(cloudServiceCapabilities) {
     return FPANE_UIntToFREObject(capabilities);
 }
 
+DEFINE_ANE_FUNCTION(requestCloudServiceCapabilities) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    [controller requestCloudServiceCapabilities];
+    return nil;
+}
+
 DEFINE_ANE_FUNCTION(cloudServiceStorefrontCountryCode) {
     AppleMusic* controller = GetAppleMusicContextNativeData(context);
     if (!controller)
         return FPANE_CreateError(@"context's AppleMusic is null", 0);
     
     NSString* countryCode = [controller getCloudServiceStorefrontCountryCode];
-    return FPANE_NSStringToFREObject(countryCode);
+    return FPANE_NSStringToFREObjectAM(countryCode);
 }
 
 DEFINE_ANE_FUNCTION(getMediaLibrarySongs) {
@@ -784,7 +794,7 @@ DEFINE_ANE_FUNCTION(getMediaLibrarySongs) {
     NSArray *items = [query items];
     [controller setCurrentMediaLibrarySongs:items];
     NSString *itemsJSONString = [controller mediaItemsToJSONString:items];
-    return FPANE_NSStringToFREObject(itemsJSONString);
+    return FPANE_NSStringToFREObjectAM(itemsJSONString);
 }
 
 DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
@@ -815,7 +825,7 @@ DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
     
     [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
     NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
-    return FPANE_NSStringToFREObject(playlistsJSONString);
+    return FPANE_NSStringToFREObjectAM(playlistsJSONString);
     
 }
 
@@ -969,7 +979,7 @@ DEFINE_ANE_FUNCTION(playbackState) {
         default:
             break;
     }
-    return FPANE_NSStringToFREObject(parsedState);
+    return FPANE_NSStringToFREObjectAM(parsedState);
 }
 
 DEFINE_ANE_FUNCTION(nowPlayingItem) {
@@ -984,7 +994,8 @@ DEFINE_ANE_FUNCTION(nowPlayingItem) {
     if (item != nil) {
         itemJSONString = [controller mediaItemToJSONString:item songType:songType];
     }
-    return itemJSONString != nil ? FPANE_NSStringToFREObject(itemJSONString) : nil;
+    
+    return itemJSONString != nil ? FPANE_NSStringToFREObjectAM(itemJSONString) : nil;
 }
 
 DEFINE_ANE_FUNCTION(performAppleMusicCatalogSearch) {
@@ -1065,6 +1076,7 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(cloudServiceAuthorizationStatus, NULL),
         MAP_FUNCTION(requestAuthorization, NULL),
         MAP_FUNCTION(cloudServiceCapabilities, NULL),
+        MAP_FUNCTION(requestCloudServiceCapabilities, NULL),
         MAP_FUNCTION(cloudServiceStorefrontCountryCode, NULL),
         MAP_FUNCTION(getMediaLibrarySongs, NULL),
         MAP_FUNCTION(getMediaLibraryPlaylists, NULL),
