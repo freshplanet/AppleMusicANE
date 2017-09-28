@@ -138,8 +138,13 @@
         // media library songs
         [_musicPlayerController setQueueWithItemCollection:[MPMediaItemCollection collectionWithItems:mediaItems]];
     }
-    
-    [_musicPlayerController play];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        //Run your loop here
+        [_musicPlayerController play];
+        
+    });
+   
     
 }
 
