@@ -226,8 +226,8 @@
 }
 
 - (void) requestStorefrontCountryCode {
-    // default to "us"
-    _cloudServiceStorefrontCountryCode = @"us";
+//     default to "us"
+//    _cloudServiceStorefrontCountryCode = @"us";
     
     if ([NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){11,0,0}]) {
 
@@ -340,6 +340,8 @@
           NSMutableArray* resultsArray = [[NSMutableArray alloc] init];
           for (NSDictionary* songDictionary in songsDataArray) {
               
+              [self sendLog:[self dictionaryToNSString:songDictionary]];
+              
               NSDictionary* songAttributes = songDictionary[@"attributes"];
               NSMutableDictionary* parsedSong = [[NSMutableDictionary alloc] init];
               [parsedSong setValue:songDictionary[@"id"] forKey:kSONG_ID];
@@ -347,6 +349,7 @@
               [parsedSong setValue:@"" forKey:kALBUM_NAME];
               [parsedSong setValue:songAttributes[@"artistName"] forKey:kARTIST_NAME];
               [parsedSong setValue:kSongType_APPLE_MUSIC_CATALOG forKey:kSONG_TYPE];
+              [parsedSong setValue:songAttributes[@"url"] forKey:kSONG_URL];
               NSNumber* duration = songAttributes[@"durationInMillis"];
               [parsedSong setValue:@([duration floatValue]/1000.0) forKey:kSONG_DURATION];
               NSDictionary* artwork = songAttributes[@"artwork"];
@@ -630,6 +633,16 @@ DEFINE_ANE_FUNCTION(initialize) {
         [controller sendLog:[@"Exception occured while trying to set developer token : " stringByAppendingString:exception.reason]];
     }
     
+    
+    return nil;
+}
+
+DEFINE_ANE_FUNCTION(requestStorefrontCountryCode) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+     [controller requestStorefrontCountryCode];
     
     return nil;
 }
@@ -1103,6 +1116,7 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(getMediaLibrarySongArtwork, NULL),
         MAP_FUNCTION(openAppleMusicApp, NULL),
         MAP_FUNCTION(openAppleMusicSettings, NULL),
+        MAP_FUNCTION(requestStorefrontCountryCode, NULL),
         
         
     };

@@ -66,6 +66,7 @@ static NSString *const kSONG_NAME = @"song_name";
 static NSString *const kARTIST_NAME = @"artist_name";
 static NSString *const kALBUM_NAME = @"album_name";
 static NSString *const kSONG_DURATION = @"song_duration";
+static NSString *const kSONG_URL = @"song_url";
 
 static NSString *const kSONG_ARTWORK_WIDTH = @"artwork_width";
 static NSString *const kSONG_ARTWORK_HEIGHT = @"artwork_height";

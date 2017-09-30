@@ -270,6 +270,13 @@ public class AirAppleMusic extends EventDispatcher {
         _extContext.call("openAppleMusicSettings");
     }
 
+	/**
+	 * Request Storefront country code
+	 */
+	public function requestStorefrontCountryCode():void {
+		_extContext.call("requestStorefrontCountryCode");
+	}
+
 	// --------------------------------------------------------------------------------------//
 	//																						 //
 	// 									 	PRIVATE API										 //
@@ -383,7 +390,7 @@ public class AirAppleMusic extends EventDispatcher {
 		var songsArray:Array = JSON.parse(jsonString) as Array;
 		for (var i:int = 0; i < songsArray.length; i++) {
 			var songObject:Object = songsArray[i];
-			result.push(new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height));
+			result.push(new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height, songObject.song_url));
 		}
 
 		return result;
@@ -416,7 +423,7 @@ public class AirAppleMusic extends EventDispatcher {
         if(!jsonString)
             return null;
 		var songObject:Object = JSON.parse(jsonString);
-		return new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height);
+		return new AirAppleMusicSong(songObject.song_id, songObject.song_name, songObject.album_name, songObject.artist_name, songObject.song_duration, AirAppleMusicSongType.fromValue(songObject.song_type), songObject.artwork_url, songObject.artwork_width, songObject.artwork_height, songObject.song_url);
 	}
 
 	}

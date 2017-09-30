@@ -28,6 +28,7 @@ public class AirAppleMusicSong {
 	private var _artworkURL:String;
 	private var _artworkWidth:Number;
 	private var _artworkHeight:Number;
+	private var _url:String;
 
 	/**
 	 * AirAppleMusicSong
@@ -41,7 +42,7 @@ public class AirAppleMusicSong {
 	 * @param artworkWidth
 	 * @param artworkHeight
 	 */
-	public function AirAppleMusicSong(id:String, songName:String, albumName:String, artistName:String, duration:Number, type:AirAppleMusicSongType, artworkURL:String, artworkWidth:Number, artworkHeight:Number) {
+	public function AirAppleMusicSong(id:String, songName:String, albumName:String, artistName:String, duration:Number, type:AirAppleMusicSongType, artworkURL:String, artworkWidth:Number, artworkHeight:Number, url:String) {
 		_id = id;
 		_songName = songName;
 		_albumName = albumName;
@@ -51,6 +52,7 @@ public class AirAppleMusicSong {
 		_artworkURL = artworkURL;
 		_artworkWidth = artworkWidth;
 		_artworkHeight = artworkHeight;
+		_url = url;
 	}
 
 	/**
@@ -127,6 +129,13 @@ public class AirAppleMusicSong {
 	 */
 	public function get artworkURL():String {
 		return _artworkURL;
+	}
+
+	/**
+	 * Apple Music URL for the song
+	 */
+	public function get url():String {
+		return _url;
 	}
 }
 }
