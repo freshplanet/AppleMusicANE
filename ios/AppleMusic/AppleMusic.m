@@ -140,7 +140,6 @@
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        //Run your loop here
         [_musicPlayerController play];
         
     });
@@ -149,11 +148,15 @@
 }
 
 - (void) togglePlayPause {
-    if (_musicPlayerController.playbackState == MPMusicPlaybackStatePlaying) {
-        [_musicPlayerController pause];
-    } else {
-        [_musicPlayerController play];
-    }
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if (_musicPlayerController.playbackState == MPMusicPlaybackStatePlaying) {
+            [_musicPlayerController pause];
+        } else {
+            [_musicPlayerController play];
+        }
+
+    });
 }
 
 - (void) skipToNextSong {
@@ -339,8 +342,6 @@
           
           NSMutableArray* resultsArray = [[NSMutableArray alloc] init];
           for (NSDictionary* songDictionary in songsDataArray) {
-              
-              [self sendLog:[self dictionaryToNSString:songDictionary]];
               
               NSDictionary* songAttributes = songDictionary[@"attributes"];
               NSMutableDictionary* parsedSong = [[NSMutableDictionary alloc] init];
