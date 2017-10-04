@@ -24,6 +24,8 @@ import com.freshplanet.ane.AppleMusic.events.AirAppleMusicCloudServiceEvent;
 import com.freshplanet.ane.AppleMusic.events.AirAppleMusicErrorEvent;
 import com.freshplanet.ane.AppleMusic.events.AirAppleMusicEvent;
 import com.freshplanet.ane.AppleMusic.events.AirAppleMusicCatalogSearchEvent;
+import com.freshplanet.ane.AppleMusic.events.AirAppleMusicPlaylistEvent;
+
 import flash.display.BitmapData;
 import flash.events.EventDispatcher;
 import flash.events.StatusEvent;
@@ -146,6 +148,21 @@ public class AirAppleMusic extends EventDispatcher {
 		return mediaLibraryPlaylists;
     }
 
+	/**
+	 * Create playlist
+	 */
+	public function createPlaylist(playlistName:String):void {
+		_extContext.call("createPlaylist", playlistName);
+	}
+
+	/**
+	 * Get playlist
+	 */
+	public function getPlaylist(playlistId:String):AirAppleMusicPlaylist {
+		var playlistString:String = _extContext.call("getPlaylist", playlistId) as String;
+		return parsePlaylistItemJSON(playlistString);
+	}
+
     /**
      * Add song to playlist
      */
@@ -235,6 +252,13 @@ public class AirAppleMusic extends EventDispatcher {
 			return null;
 		return parseAppleMusicSongItemJSON(itemString);
 
+	}
+
+	/**
+	 * Is song in playlist
+	 */
+	public function isSongInPlaylist(playlistID:String, songID:String):Boolean {
+		return _extContext.call("isSongInPlaylist", playlistID, songID) as Boolean;
 	}
 
 	/**
@@ -354,9 +378,20 @@ public class AirAppleMusic extends EventDispatcher {
 				event.code == AirAppleMusicErrorEvent.ERROR_PRESENTING_TRIAL_DIALOG ||
 				event.code == AirAppleMusicErrorEvent.ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES ||
 				event.code == AirAppleMusicErrorEvent.ERROR_ADDING_SONG_TO_PLAYLIST ||
-				event.code == AirAppleMusicErrorEvent.ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE
+				event.code == AirAppleMusicErrorEvent.ERROR_REQUESTING_STOREFRONT_COUNTRY_CODE ||
+				event.code == AirAppleMusicErrorEvent.ERROR_CREATE_PLAYLIST
 		)
             this.dispatchEvent(new AirAppleMusicErrorEvent(event.code, event.level));
+        else if (event.code == AirAppleMusicPlaylistEvent.PLAYLIST_DATA)
+        {
+	        var playlistString:String = event.level;
+	        this.dispatchEvent(new AirAppleMusicPlaylistEvent(AirAppleMusicPlaylistEvent.PLAYLIST_DATA, parsePlaylistItemJSON(playlistString)));
+        }
+        else if (event.code == AirAppleMusicEvent.ADDED_SONG_TO_PLAYLIST)
+        {
+
+	        this.dispatchEvent(new AirAppleMusicEvent(AirAppleMusicEvent.ADDED_SONG_TO_PLAYLIST));
+        }
         else
             this.dispatchEvent(event);
     }
@@ -394,6 +429,18 @@ public class AirAppleMusic extends EventDispatcher {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Parse json playlist results array received from native implementation
+	 * @param jsonString
+	 * @return
+	 */
+	private function parsePlaylistItemJSON(jsonString:String):AirAppleMusicPlaylist {
+		if(!jsonString)
+			return null;
+		var playlistObject:Object = JSON.parse(jsonString);
+		return new AirAppleMusicPlaylist(playlistObject.playlist_id, playlistObject.playlist_name);
 	}
 
     /**

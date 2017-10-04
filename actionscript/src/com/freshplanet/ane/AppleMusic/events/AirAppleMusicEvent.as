@@ -31,6 +31,11 @@ public class AirAppleMusicEvent extends Event {
 	 */
 	static public const DID_DISMISS_SUBSCRIPTION_TRIAL_DIALOG :String = "AppleMusicEvent_didDismissSubscriptionTrialDialog";
 
+	/**
+	 * Successfully added a song to playlist
+	 */
+	static public const ADDED_SONG_TO_PLAYLIST :String = "AppleMusicEvent_addedSongToPlaylist";
+
 	public function AirAppleMusicEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
 		super(type, bubbles, cancelable);
 	}

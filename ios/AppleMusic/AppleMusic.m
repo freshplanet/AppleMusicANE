@@ -109,9 +109,7 @@
     _currentMediaLibrarySongs = songs;
 }
 
-- (void) setCurrentMediaLibraryPlaylists : (NSArray<MPMediaPlaylist *>*) playlists {
-    _currentMediaLibraryPlaylists = playlists;
-}
+
 
 - (BOOL) isMediaLibraryItem : (MPMediaItem*) song {
     if (_currentMediaLibrarySongs == nil) {
@@ -378,21 +376,57 @@
 
 -(void) addSongToPlaylist :(NSString*) playlistID songID:(NSString*) songId songType:(NSString*) songType {
     
-    NSArray *playlists = [_currentMediaLibraryPlaylists filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
-        return [playlistID isEqualToString:[(NSNumber *)[object valueForProperty:MPMediaPlaylistPropertyPersistentID] stringValue]];
-    }]];
+    MPMediaPlaylist *playlist = [self getPlaylist:playlistID];
 
-    if (playlists.count != 1) {
+    if (playlist == nil) {
         [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:[@"Could not find playlist with id " stringByAppendingString:playlistID]];
+        return;
     }
-    MPMediaPlaylist *playlist = playlists.firstObject;
+    
     [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
         if (error != nil) {
             [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
             return;
         }
+        
+        [self sendEvent:kAirAppleMusicEvent_ADDED_SONG_TO_PLAYLIST];
+        
     }];
     
+}
+
+-(void) createPlaylist:(NSString*) name {
+    
+    NSUUID *uuid = [NSUUID UUID];
+    [[MPMediaLibrary defaultMediaLibrary] getPlaylistWithUUID:uuid creationMetadata:[[MPMediaPlaylistCreationMetadata alloc] initWithName:name] completionHandler:^(MPMediaPlaylist * _Nullable playlist, NSError * _Nullable error) {
+        if (error != nil) {
+            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_CREATE_PLAYLIST level:error.localizedDescription];
+            return;
+        }
+        
+        [self sendEvent:kAirAppleMusicPlaylistEvent_PLAYLIST_DATA level:[self playlistToJSONString:playlist]];
+        
+    }];
+    
+}
+
+-(MPMediaPlaylist*) getPlaylist:(NSString*) playlistID {
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+    formatter.numberStyle = NSNumberFormatterDecimalStyle;
+    NSDecimalNumber *value = [NSDecimalNumber decimalNumberWithString:playlistID];
+    
+    
+    MPMediaQuery *query = [MPMediaQuery playlistsQuery];
+    MPMediaPropertyPredicate *predicate = [MPMediaPropertyPredicate predicateWithValue:value forProperty:MPMediaPlaylistPropertyPersistentID];
+    [query addFilterPredicate:predicate];
+    
+    NSArray *playlists = [query collections];
+    
+    if (playlists.count > 0) {
+        return playlists.firstObject;
+    } else {
+        return nil;
+    }
 }
 
 - (NSString*) dictionaryToNSString :(NSDictionary*) dictionary {
@@ -460,6 +494,12 @@
     
 }
 
+-(NSString*) playlistToJSONString: (MPMediaPlaylist*) playlist {
+    
+    NSDictionary *itemDict = [self playlistToNSDictionary:playlist];
+    return [self dictionaryToNSString:itemDict];
+}
+
 -(NSString*) playlistsToJSONString: (NSArray*) playlists {
     
     NSMutableArray* result = [[NSMutableArray alloc] init];
@@ -474,6 +514,8 @@
     }
     return [self arrayToNSString:result];
 }
+
+
 
 - (NSString*) arrayToNSString:(NSArray*) array{
     NSError *error;
@@ -816,6 +858,62 @@ DEFINE_ANE_FUNCTION(getMediaLibrarySongs) {
     return FPANE_NSStringToFREObjectAM(itemsJSONString);
 }
 
+DEFINE_ANE_FUNCTION(isSongInPlaylist) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
+        [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    @try {
+        
+        NSString* playlistID = FPANE_FREObjectToNSString(argv[0]);
+        NSString* songID = FPANE_FREObjectToNSString(argv[1]);
+        
+        NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+        formatter.numberStyle = NSNumberFormatterDecimalStyle;
+        NSDecimalNumber *value = [NSDecimalNumber decimalNumberWithString:playlistID];
+        
+        
+        MPMediaQuery *query = [MPMediaQuery playlistsQuery];
+        MPMediaPropertyPredicate *predicate = [MPMediaPropertyPredicate predicateWithValue:value forProperty:MPMediaPlaylistPropertyPersistentID];
+        [query addFilterPredicate:predicate];
+        
+        NSArray *playlists = [query collections];
+        MPMediaPlaylist *playlist = playlists.count > 0 ? playlists.firstObject : nil;
+        
+        
+        if (playlist != nil) {
+            NSArray *songs = [playlist items];
+            
+            NSArray *mediaItems = [songs filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+                return [[(NSNumber*)[(MPMediaItem*)object valueForProperty:MPMediaItemPropertyPersistentID] stringValue] isEqualToString:songID];
+            }]];
+            
+            if(mediaItems.count == 0) {
+                mediaItems = [songs filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+                    MPMediaItem *item = (MPMediaItem*)(object);
+                    return [item.playbackStoreID isEqualToString:songID];
+                }]];
+            }
+            
+            return FPANE_BOOLToFREObject(mediaItems.count > 0);
+            
+        } else {
+            return FPANE_BOOLToFREObject(NO);
+        }
+        
+    }
+    @catch (NSException *exception) {
+        [controller sendLog:[@"Exception occured while trying to get playlist : " stringByAppendingString:exception.reason]];
+    }
+    
+    return FPANE_BOOLToFREObject(NO);
+}
+
 DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
     AppleMusic* controller = GetAppleMusicContextNativeData(context);
     if (!controller)
@@ -843,9 +941,73 @@ DEFINE_ANE_FUNCTION(getMediaLibraryPlaylists) {
         }
     }
     
-    [controller setCurrentMediaLibraryPlaylists:filteredPlaylists];
+    
     NSString *playlistsJSONString = [controller playlistsToJSONString:filteredPlaylists];
     return FPANE_NSStringToFREObjectAM(playlistsJSONString);
+    
+}
+
+DEFINE_ANE_FUNCTION(getPlaylist) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
+        [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    if ([SKCloudServiceController authorizationStatus] != SKCloudServiceAuthorizationStatusAuthorized) {
+        [controller sendLog:@"CloudService permission is not authorized"];
+        return nil;
+    }
+    
+    @try {
+        
+        NSString* playlistID = FPANE_FREObjectToNSString(argv[0]);
+        MPMediaPlaylist *playlist = [controller getPlaylist:playlistID];
+        if (playlist != nil) {
+             return FPANE_NSStringToFREObjectAM([controller playlistToJSONString:playlist]);
+        }
+
+        return nil;
+        
+    }
+    @catch (NSException *exception) {
+        [controller sendLog:[@"Exception occured while trying to get playlist : " stringByAppendingString:exception.reason]];
+    }
+    
+    return nil;
+    
+}
+
+DEFINE_ANE_FUNCTION(createPlaylist) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    if ([MPMediaLibrary authorizationStatus] != MPMediaLibraryAuthorizationStatusAuthorized) {
+        [controller sendLog:@"MediaLibrary permission is not authorized"];
+        return nil;
+    }
+    
+    if ([SKCloudServiceController authorizationStatus] != SKCloudServiceAuthorizationStatusAuthorized) {
+        [controller sendLog:@"CloudService permission is not authorized"];
+        return nil;
+    }
+  
+    @try {
+        
+        NSString* playlistName = FPANE_FREObjectToNSString(argv[0]);
+        
+        [controller createPlaylist:playlistName];
+        
+    }
+    @catch (NSException *exception) {
+        [controller sendLog:[@"Exception occured while trying to create playlist : " stringByAppendingString:exception.reason]];
+    }
+    
+    return nil;
     
 }
 
@@ -859,7 +1021,7 @@ DEFINE_ANE_FUNCTION(addToPlaylist) {
         return nil;
     }
     
-    
+    [controller sendLog:@"adding song to playlist"];
     
     @try {
         NSString* playlistID = FPANE_FREObjectToNSString(argv[0]);
@@ -1103,7 +1265,10 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(cloudServiceStorefrontCountryCode, NULL),
         MAP_FUNCTION(getMediaLibrarySongs, NULL),
         MAP_FUNCTION(getMediaLibraryPlaylists, NULL),
+        MAP_FUNCTION(getPlaylist, NULL),
+        MAP_FUNCTION(createPlaylist, NULL),
         MAP_FUNCTION(addToPlaylist, NULL),
+        MAP_FUNCTION(isSongInPlaylist, NULL),
         MAP_FUNCTION(playSongs, NULL),
         MAP_FUNCTION(playSongsByProductId, NULL),
         MAP_FUNCTION(togglePlayPause, NULL),

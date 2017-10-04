@@ -7,6 +7,7 @@ public class AirAppleMusicErrorEvent extends AirAppleMusicEvent {
     static public const ERROR_PERFORMING_STOREFRONTS_LOOKUP             :String = "AppleMusicErrorEvent_errorPerformingStorefrontsLookup";
     static public const ERROR_PERFORMING_APPLE_MUSIC_CATALOG_SEARCH     :String = "AppleMusicErrorEvent_errorPerformingAppleMusicCatalogSearch";
     static public const ERROR_ADDING_SONG_TO_PLAYLIST                   :String = "AppleMusicErrorEvent_errorAddingSongToPlaylist";
+    static public const ERROR_CREATE_PLAYLIST                           :String = "AppleMusicErrorEvent_errorCreatePlaylist";
 
     private var _message:String;
 

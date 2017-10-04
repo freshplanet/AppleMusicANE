@@ -27,7 +27,6 @@
     SKCloudServiceCapability _cloudServiceCapabilities;
     NSString* _cloudServiceStorefrontCountryCode;
     NSArray<MPMediaItem *>* _currentMediaLibrarySongs;
-    NSArray<MPMediaPlaylist *>* _currentMediaLibraryPlaylists;
     MPMusicPlayerController* _musicPlayerController;
     
 }

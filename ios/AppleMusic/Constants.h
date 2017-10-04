@@ -28,6 +28,8 @@ static NSString *const kAppleMusicEvent_MUSIC_PLAYER_DID_UPDATE_STATE  = @"Apple
 static NSString *const kAppleMusicEvent_SUBSCRIPTION_TRIAL_NOT_ELIGIBLE  = @"AppleMusicEvent_subscriptionTrialNotEligible";
 static NSString *const kAppleMusicEvent_DID_DISMISS_SUBSCRIPTION_TRIAL_DIALOG  = @"AppleMusicEvent_didDismissSubscriptionTrialDialog";
 static NSString *const kAppleMusicSearchEvent_RECEIVED_SEARCH_RESULTS  = @"AppleMusicSearchEvent_receivedSearchResults";
+static NSString *const kAirAppleMusicPlaylistEvent_PLAYLIST_DATA = @"AppleMusicPlaylistEvent_playlistData";
+static NSString *const kAirAppleMusicEvent_ADDED_SONG_TO_PLAYLIST = @"AppleMusicEvent_addedSongToPlaylist";
 
 static NSString *const kAirAppleMusicErrorEvent_ERROR_REQUESTING_CLOUD_SERVICE_CAPABILITIES = @"AppleMusicErrorEvent_errorRequestingCloudServiceCapabilities";
 static NSString *const kAirAppleMusicErrorEvent_ERROR_PRESENTING_TRIAL_DIALOG = @"AppleMusicErrorEvent_errorPresentingTrialDialog";
@@ -35,6 +37,8 @@ static NSString *const kAirAppleMusicErrorEvent_ERROR_REQUESTING_STOREFRONT_COUN
 static NSString *const kAirAppleMusicErrorEvent_ERROR_PERFORMING_STOREFRONTS_LOOKUP = @"AppleMusicErrorEvent_errorPerformingStorefrontsLookup";
 static NSString *const kAirAppleMusicErrorEvent_ERROR_PERFORMING_APPLE_MUSIC_CATALOG_SEARCH = @"AppleMusicErrorEvent_errorPerformingAppleMusicCatalogSearch";
 static NSString *const kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST = @"AppleMusicErrorEvent_errorAddingSongToPlaylist";
+static NSString *const kAirAppleMusicErrorEvent_ERROR_CREATE_PLAYLIST = @"AppleMusicErrorEvent_errorCreatePlaylist";
+
 
 /* AUTHORIZATION TYPE */
 static NSString *const kAuthorizationType_MEDIA_LIBRARY = @"media_library";
