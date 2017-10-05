@@ -649,14 +649,6 @@ AppleMusic* GetAppleMusicContextNativeData(FREContext context) {
     return (__bridge AppleMusic*)controller;
 }
 
-DEFINE_ANE_FUNCTION(isSupported) {
-    
-    bool isSupported = false;
-    if ([NSProcessInfo.processInfo isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){10,3,0}]) {
-        isSupported = true;
-    }
-    return FPANE_BOOLToFREObject(isSupported);
-}
 
 DEFINE_ANE_FUNCTION(initialize) {
     AppleMusic* controller = GetAppleMusicContextNativeData(context);
@@ -1254,7 +1246,6 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     FRESetContextNativeData(ctx, (void*)CFBridgingRetain(controller));
     
     static FRENamedFunction functions[] = {
-        MAP_FUNCTION(isSupported, NULL),
         MAP_FUNCTION(initialize, NULL),
         MAP_FUNCTION(presentTrialDialogIfEligible, NULL),
         MAP_FUNCTION(mediaLibraryAuthorizationStatus, NULL),

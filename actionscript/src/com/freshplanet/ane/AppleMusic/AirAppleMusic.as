@@ -50,11 +50,7 @@ public class AirAppleMusic extends EventDispatcher {
 	 * Is the ANE supported on the current platform
 	 */
 	static public function get isSupported():Boolean {
-        return  isIOS && instance.isIOSVersionAtLeast103;
-	}
-
-	public function get isIOSVersionAtLeast103():Boolean {
-		return _extContext.call("isSupported");
+        return isIOS && isIOSAtLeast103;
 	}
 
 	/**
@@ -411,6 +407,22 @@ public class AirAppleMusic extends EventDispatcher {
 
 	private static function get isIOS():Boolean {
 		return Capabilities.manufacturer.indexOf("iOS") > -1;
+	}
+
+	private static function get isIOSAtLeast103():Boolean {
+		if(!isIOS)
+			return false;
+
+		var iosVersion:String = Capabilities.os.match( /([0-9]{1,2}\.?){2,3}/ )[0];
+		var array:Array = iosVersion.split(".");
+		if(array.length >= 2) {
+			if(array[0] >= 10 && array[1] >= 3 || array[0] > 10)
+					return true;
+
+		}
+
+		return false;
+
 	}
 
 	/**
