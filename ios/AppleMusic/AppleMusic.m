@@ -136,7 +136,7 @@
         // media library songs
         [_musicPlayerController setQueueWithItemCollection:[MPMediaItemCollection collectionWithItems:mediaItems]];
     }
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         
         [_musicPlayerController play];
         
@@ -147,7 +147,7 @@
 
 - (void) togglePlayPause {
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         if (_musicPlayerController.playbackState == MPMusicPlaybackStatePlaying) {
             [_musicPlayerController pause];
         } else {
