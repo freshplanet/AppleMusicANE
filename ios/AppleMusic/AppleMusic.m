@@ -20,7 +20,6 @@
 - (id) initWithContext:(FREContext)extensionContext {
     
     if (self = [super init]) {
-        
         _context = extensionContext;
         _cloudServiceController = [[SKCloudServiceController alloc] init];
         _cloudServiceCapabilities = SKCloudServiceCapabilityNone;
@@ -340,7 +339,7 @@
           NSMutableArray* resultsArray = [[NSMutableArray alloc] init];
           if (songsDataArray != nil) {
               for (NSDictionary* songDictionary in songsDataArray) {
-                  if (songDictionary == nil) {
+                  if (songDictionary == nil || [[NSNull null] isEqual:songDictionary]) {
                       continue;
                   }
                   NSDictionary* songAttributes = songDictionary[@"attributes"];
