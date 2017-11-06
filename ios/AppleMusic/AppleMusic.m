@@ -329,54 +329,60 @@
           NSError* jsonError;
           NSDictionary* jsonData = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
           if (jsonError != nil) {
+              [self sendLog:[@"Exception occured in performAppleMusicCatalogSearch : " stringByAppendingString:jsonError.localizedDescription]];
               return;
           }
           
-          NSDictionary* resultsDictionary = jsonData[@"results"];
-          
-          NSDictionary* songsDictionary = (resultsDictionary != nil) ? resultsDictionary[@"songs"] : nil;
-          NSArray* songsDataArray = (songsDictionary != nil) ? songsDictionary[@"data"] : nil;
-          NSMutableArray* resultsArray = [[NSMutableArray alloc] init];
-          if (songsDataArray != nil) {
-              for (NSDictionary* songDictionary in songsDataArray) {
-                  if (songDictionary == nil || [[NSNull null] isEqual:songDictionary]) {
-                      continue;
+          @try {
+              NSDictionary* resultsDictionary = jsonData[@"results"];
+              NSDictionary* songsDictionary = nil;
+              NSArray* songsDataArray = nil;
+              if (resultsDictionary) {
+                  songsDictionary = resultsDictionary[@"songs"];
+                  if (songsDictionary) {
+                      songsDataArray = songsDictionary[@"data"];
                   }
-                  NSDictionary* songAttributes = songDictionary[@"attributes"];
-                  if (songAttributes == nil) {
-                      continue;
-                  }
-                  NSMutableDictionary* parsedSong = [[NSMutableDictionary alloc] init];
-                  [parsedSong setValue:songDictionary[@"id"] forKey:kSONG_ID];
-                  [parsedSong setValue:songAttributes[@"name"] forKey:kSONG_NAME];
-                  [parsedSong setValue:@"" forKey:kALBUM_NAME];
-                  [parsedSong setValue:songAttributes[@"artistName"] forKey:kARTIST_NAME];
-                  [parsedSong setValue:kSongType_APPLE_MUSIC_CATALOG forKey:kSONG_TYPE];
-                  [parsedSong setValue:songAttributes[@"url"] forKey:kSONG_URL];
-                  NSNumber* duration = songAttributes[@"durationInMillis"];
-                  [parsedSong setValue:@([duration floatValue]/1000.0) forKey:kSONG_DURATION];
-                  NSDictionary* artwork = songAttributes[@"artwork"];
-                  if (artwork != nil) {
-                      NSNumber* artworkWidth = artwork[@"width"];
-                      NSNumber* artworkHeight = artwork[@"height"];
-                      NSString* artworkURL = artwork[@"url"];
-                      artworkURL = [artworkURL stringByReplacingOccurrencesOfString:@"{w}" withString:[artworkWidth stringValue]];
-                      artworkURL = [artworkURL stringByReplacingOccurrencesOfString:@"{h}" withString:[artworkHeight stringValue]];
-                      
-                      [parsedSong setValue:artworkWidth forKey:kSONG_ARTWORK_WIDTH];
-                      [parsedSong setValue:artworkHeight forKey:kSONG_ARTWORK_HEIGHT];
-                      [parsedSong setValue:artworkURL forKey:kSONG_ARTWORK_URL];
-                  }
-                  [resultsArray addObject:parsedSong];
               }
+              NSMutableArray* resultsArray = [[NSMutableArray alloc] init];
+              if (songsDataArray != nil) {
+                  for (NSDictionary* songDictionary in songsDataArray) {
+                      if (songDictionary == nil || [[NSNull null] isEqual:songDictionary]) {
+                          continue;
+                      }
+                      NSDictionary* songAttributes = songDictionary[@"attributes"];
+                      if (songAttributes == nil) {
+                          continue;
+                      }
+                      NSMutableDictionary* parsedSong = [[NSMutableDictionary alloc] init];
+                      [parsedSong setValue:songDictionary[@"id"] forKey:kSONG_ID];
+                      [parsedSong setValue:songAttributes[@"name"] forKey:kSONG_NAME];
+                      [parsedSong setValue:@"" forKey:kALBUM_NAME];
+                      [parsedSong setValue:songAttributes[@"artistName"] forKey:kARTIST_NAME];
+                      [parsedSong setValue:kSongType_APPLE_MUSIC_CATALOG forKey:kSONG_TYPE];
+                      [parsedSong setValue:songAttributes[@"url"] forKey:kSONG_URL];
+                      NSNumber* duration = songAttributes[@"durationInMillis"];
+                      [parsedSong setValue:@([duration floatValue]/1000.0) forKey:kSONG_DURATION];
+                      NSDictionary* artwork = songAttributes[@"artwork"];
+                      if (artwork != nil) {
+                          NSNumber* artworkWidth = artwork[@"width"];
+                          NSNumber* artworkHeight = artwork[@"height"];
+                          NSString* artworkURL = artwork[@"url"];
+                          artworkURL = [artworkURL stringByReplacingOccurrencesOfString:@"{w}" withString:[artworkWidth stringValue]];
+                          artworkURL = [artworkURL stringByReplacingOccurrencesOfString:@"{h}" withString:[artworkHeight stringValue]];
+                          
+                          [parsedSong setValue:artworkWidth forKey:kSONG_ARTWORK_WIDTH];
+                          [parsedSong setValue:artworkHeight forKey:kSONG_ARTWORK_HEIGHT];
+                          [parsedSong setValue:artworkURL forKey:kSONG_ARTWORK_URL];
+                      }
+                      [resultsArray addObject:parsedSong];
+                  }
+              }
+              NSData *resultData = [NSJSONSerialization dataWithJSONObject:resultsArray options:NSJSONWritingPrettyPrinted error:&error];
+              NSString *resultJsonString = [[NSString alloc] initWithData:resultData encoding:NSUTF8StringEncoding];
+              [self sendEvent:kAppleMusicSearchEvent_RECEIVED_SEARCH_RESULTS level:resultJsonString];
+          } @catch (NSException *exception) {
+              [self sendLog:[@"Exception occured in performAppleMusicCatalogSearch : " stringByAppendingString:exception.reason]];
           }
-          
-          
-          NSData *resultData = [NSJSONSerialization dataWithJSONObject:resultsArray options:NSJSONWritingPrettyPrinted error:&error];
-          NSString *resultJsonString = [[NSString alloc] initWithData:resultData encoding:NSUTF8StringEncoding];
-          [self sendEvent:kAppleMusicSearchEvent_RECEIVED_SEARCH_RESULTS level:resultJsonString];
-          
-          
       }] resume];
 }
 
