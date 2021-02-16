@@ -385,7 +385,7 @@
           }
       }] resume];
 }
-static NSString * _playlistIdToAdd = nil;
+
 -(void) addSongToPlaylist :(NSString*) playlistID songID:(NSString*) songId songType:(NSString*) songType {
     
     MPMediaPlaylist *playlist = [self getPlaylist:playlistID];
@@ -394,54 +394,31 @@ static NSString * _playlistIdToAdd = nil;
         [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:[@"Could not find playlist with id " stringByAppendingString:playlistID]];
         return;
     }
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMusicPlayerControllerPlaybackStateDidChangeNotification object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onSongStartPlayingForAddToPlaylist)
-                                                 name:MPMusicPlayerControllerPlaybackStateDidChangeNotification
-                                               object:nil];
-    
-    [_musicPlayerController stop];
-    _playlistIdToAdd = playlistID;
-    [_musicPlayerController setQueueWithStoreIDs:@[songId] ];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [_musicPlayerController play];
-    });
-}
 
--(void)onSongStartPlayingForAddToPlaylist {
-    
-    if(_musicPlayerController.nowPlayingItem && _playlistIdToAdd != nil) {
-        
-        // remove observer
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:MPMusicPlayerControllerPlaybackStateDidChangeNotification object:nil];
-        
-        double delayInSeconds = 0.5;
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-           
-        });
-        
-        MPMediaPlaylist *playlist = [self getPlaylist:_playlistIdToAdd];
-        [playlist addMediaItems:@[_musicPlayerController.nowPlayingItem] completionHandler:^(NSError * _Nullable error) {
-            // readd existing observer
-            [_musicPlayerController stop];
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(handleMusicPlayerControllerPlaybackStateDidChange)
-                                                         name:MPMusicPlayerControllerPlaybackStateDidChangeNotification
-                                                       object:nil];
-            
-            
-            if (error != nil) {
-                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+    [_musicPlayerController setQueueWithStoreIDs:@[songId] ];
+    if (@available(iOS 10.1, *)) {
+        [_musicPlayerController prepareToPlayWithCompletionHandler:^(NSError * _Nullable err) {
+            if(err != nil) {
+                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:err.localizedDescription];
                 return;
             }
-
-            [self sendEvent:kAirAppleMusicEvent_ADDED_SONG_TO_PLAYLIST];
-
+            [playlist addMediaItems:@[_musicPlayerController.nowPlayingItem] completionHandler:^(NSError * _Nullable error) {
+                if (error != nil) {
+                    [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+                    return;
+                }
+                
+                dispatch_time_t popT = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC));
+                dispatch_after(popT, dispatch_get_main_queue(), ^(void){
+                    [self sendEvent:kAirAppleMusicEvent_ADDED_SONG_TO_PLAYLIST];
+                });
+            }];
         }];
+    } else {
+        // Fallback on earlier versions
+        [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:@"Not supported by your iOS version."];
     }
+
 }
 
 -(void) createPlaylist:(NSString*) name {
