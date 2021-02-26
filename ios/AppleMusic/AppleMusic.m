@@ -395,16 +395,17 @@
         return;
     }
     
-    [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
-        if (error != nil) {
-            [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
-            return;
-        }
-        
-        [self sendEvent:kAirAppleMusicEvent_ADDED_SONG_TO_PLAYLIST];
-        
-    }];
-    
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+        [playlist addItemWithProductID:songId completionHandler:^(NSError * _Nullable error) {
+            if (error != nil) {
+                [self sendEvent:kAirAppleMusicErrorEvent_ERROR_ADDING_SONG_TO_PLAYLIST level:error.localizedDescription];
+                return;
+            }
+            
+            [self sendEvent:kAirAppleMusicEvent_ADDED_SONG_TO_PLAYLIST];
+            
+        }];
+    });
 }
 
 -(void) createPlaylist:(NSString*) name {
