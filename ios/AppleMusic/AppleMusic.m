@@ -100,6 +100,10 @@
     return _cloudServiceStorefrontCountryCode;
 }
 
+- (void) setCloudServiceStorefrontCountryCode : (NSString*) country {
+    _cloudServiceStorefrontCountryCode = country;
+}
+
 - (void) setDeveloperToken : (NSString*) developerToken {
     _developerToken = developerToken;
 }
@@ -1205,6 +1209,19 @@ DEFINE_ANE_FUNCTION(performAppleMusicCatalogSearch) {
     
 }
 
+DEFINE_ANE_FUNCTION(stubStorefrontCountryCode) {
+    AppleMusic* controller = GetAppleMusicContextNativeData(context);
+    if (!controller)
+        return FPANE_CreateError(@"context's AppleMusic is null", 0);
+    
+    NSString* stubCountryCode = FPANE_FREObjectToNSString(argv[0]);
+    if (stubCountryCode != NULL && stubCountryCode.length > 0) {
+        [controller setCloudServiceStorefrontCountryCode:stubCountryCode];
+    }
+    
+    return nil;
+}
+
 DEFINE_ANE_FUNCTION(getMediaLibrarySongArtwork) {
     
     AppleMusic* controller = GetAppleMusicContextNativeData(context);
@@ -1287,7 +1304,7 @@ void AppleMusicContextInitializer(void* extData, const uint8_t* ctxType, FRECont
         MAP_FUNCTION(openAppleMusicApp, NULL),
         MAP_FUNCTION(openAppleMusicSettings, NULL),
         MAP_FUNCTION(requestStorefrontCountryCode, NULL),
-        
+        MAP_FUNCTION(stubStorefrontCountryCode, NULL)
         
     };
     
