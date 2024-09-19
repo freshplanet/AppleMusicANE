@@ -297,6 +297,10 @@ public class AirAppleMusic extends EventDispatcher {
 		_extContext.call("requestStorefrontCountryCode");
 	}
 
+	public function stubStorefrontCountryCode(code:String = "US"):void {
+		_extContext.call("stubStorefrontCountryCode", code);
+	}
+
 	// --------------------------------------------------------------------------------------//
 	//																						 //
 	// 									 	PRIVATE API										 //
